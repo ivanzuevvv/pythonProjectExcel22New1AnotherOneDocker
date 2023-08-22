@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+
+
+<table class="table table-bordered">
+  <tr>
+    <th>Документ, подтверждающий сведение контрольной процедуры</th>
+    <th>Подразделение, ответственное за выполнение контрольной процедуры</th>
+    <th>Должность ответственного за выполнение контрольной процедуры</th>
+    <th>Способ подсчетов результатов проведения КП</th>
+    <th>Периодичность офромления чек-листов</th>
+    <th>Получатель документов, подтверждающих проведение контрольной процедуры</th>
+    <th>Организацционно-распордительные документы организации, регламентирующие выполнение контрольной процедуры</th>
+    <th>Сведения обьектк контроля</th>
+    <th>Комментарий у графе 14</th>
+  </tr>
+  {% for column in columns %}
+  <tr>
+
+
+<td><a href="{% url 'download_excel' column.pk %}">{{ column.column1 }}</a></td>
+<td><a href="{% url 'download_excel' column.pk %}">{{ column.column2 }}</a></td>
+<td><a href="{% url 'download_excel' column.pk %}">{{ column.column3 }}</a></td>
+<td><a href="{% url 'download_excel1' column.pk %}">{{ column.column4 }}</a></td>
+    <td>{{ column.column5 }}</td>
+    <td>{{ column.column6 }}</td>
+    <td>{{ column.column7 }}</td>
+    <td>{{ column.column8 }}</td>
+    <td>{{ column.column9 }}</td>
+
+</tr>
+  {% endfor %}
+    </table>
+{% endblock %}
+

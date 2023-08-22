@@ -1,0 +1,36 @@
+
+{% extends 'base.html' %}
+{% block content %}
+
+<form method="POST">
+    {% csrf_token %}
+    <table class="table table-bordered">
+        <tr>
+            <th>Номер п/п</th>
+            <th>Код КП(промежуточный)</th>
+            <th>Номер чек листа</th>
+            <th>Объект контроля</th>
+            <th>Дата документа</th>
+            <th>Номер документа</th>
+            <th>Количество документов/операций</th>
+            <th>Количество ошибок/нарушений</th>
+            <th>Примечания</th>
+        </tr>
+        {% for column in columns %}
+        <tr>
+            <td>{{ reestr.num }}</td>
+            <td>{{ reestr.cod_kp_inter }}</td>
+            <td>{{ reestr.chek_num }}</td>
+            <td>{{ reestr.obj_control }}</td>
+            <td><input type="text" name="date_document" value="{{ reestr.date_document }}"></td>
+            <td><input type="text" name="num_document" value="{{ reestr.num_document }}"></td>
+            <td><textarea name="colvo_doc" rows="10">{{ reestr.colvo_doc }}</textarea></td>
+            <td><textarea name="colvo_errors" rows="10">{{ reestr.colvo_errors }}</textarea></td>
+            <td><textarea name="notes" rows="10">{{ reestr.notes }}</textarea></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button type="submit">Сохранить</button>
+</form>
+
+{% endblock %}

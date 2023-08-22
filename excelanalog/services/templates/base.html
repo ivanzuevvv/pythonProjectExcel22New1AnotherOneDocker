@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+ <title>{% block title %}{% endblock %}</title>
+ <!-- подключение стилей и скриптов -->
+ <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+ <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+ <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+
+
+
+
+
+
+<style>
+ .o {
+    margin-top: -0px;
+
+  align-items: center;
+}
+
+.o > li {
+  margin-left: 430px;
+     margin-top: -10px;
+
+}
+
+
+.navbar-nav > li:not(:last-child) {
+  margin-right: 15px;
+}
+
+
+</style>
+
+<a class="navbar-brand mr-auto d-flex align-items-center bg-primary text-white navbar-brand" href="{% url 'index' %}" style="pointer-events: none;">
+  <img src="{% static 'services/images/logo.jpg' %}" height="50" width="80" alt="Логотип" class="mr-3 ml-3">
+  <div class="d-flex flex-column align-items-start">
+    <span class="text-white">АИС Повышение надежности систем автоматизации</span>
+    <small class="text-white">Отдел АСУТП САиМО ИТЦ</small>
+  </div>
+</a>
+
+<body>
+
+
+
+ <!-- навигационное меню -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse ml-auto" id="navbarNav">
+    <ul class="navbar-nav nav-fill">
+      <li class="nav-item dropdown">
+        <ul class="navbar-nav nav-fill">
+
+      <li class="nav-item {% if current_page == 'index' %}active{% endif %}">
+        <a class="nav-link" href="{% url 'base' %}">Главная</a>
+      </li>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+ <script>
+    $(document).ready(function() {
+      $('.dropdown-toggle').click(function() {
+        $(this).next('.dropdown-menu').toggle();
+      });
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+  </ul>
+</div>
+
+</div>
+
+
+ </nav>
+
+
+ <!-- содержимое страницы -->
+ <div class="container-fluid">
+  {% block content %}
+  {% endblock %}
+ </div>
+
+ <!-- подключение других скриптов -->
+</body>
+</html>

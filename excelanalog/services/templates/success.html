@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<html>
+<head>
+    <title>Успешное сохранение</title>
+</head>
+<body>
+    <h1>Данные успешно сохранены</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Код КП интерфейса</th>
+                <th>Номер чека</th>
+                <th>Объект контроля</th>
+                <th>Дата документа</th>
+                <th>Номер документа</th>
+                <th>Количество документов</th>
+                <th>Количество ошибок</th>
+                <th>Примечания</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(num_rows) %}
+                <tr>
+                    <td>{{ request.POST.get('num_' + str(i)) }}</td>
+                    <td>{{ request.POST.get('cod_kp_inter_' + str(i)) }}</td>
+                    <td>{{ request.POST.get('chek_num_' + str(i)) }}</td>
+                    <td>{{ request.POST.get('obj_control_' + str(i)) }}</td>
+                    <td>{{ request.POST.get('date_document_' + str(i)) }}</td>
+                    <td>{{ request.POST.get('num_document_' + str(i)) }}</td>
+                    <td>{{ request.POST.get('colvo_doc_' + str(i)) }}</td>
+                    <td>{{ request.POST.get('colvo_errors_' + str(i)) }}</td>
+                    <td>{{ request.POST.get('notes_' + str(i)) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+{% endblock %}

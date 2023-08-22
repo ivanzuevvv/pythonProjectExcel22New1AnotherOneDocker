@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<table class="table table-bordered">
+  <tr>
+    <th>номер п/п</th>
+    <th>Код КП(общий)</th>
+    <th>Код КП(промежуточный)</th>
+    <th>Наименование ИП</th>
+    <th>Описание КП</th>
+    <th>Переодичность проведения</th>
+    <th>Способ подсчета результаты проведения КП</th>
+    <th contenteditable="true">Подразделение, ответственное за проведение контрольной процедуры</th>
+    <th contenteditable="true">Исполнитель КП</th>
+    <th>Количество выполненых КП</th>
+    <th>Количество выявленных ошибок</th>
+    <th>сведения об объекте контроля</th>
+  </tr>
+  {% for column in columns %}
+  <tr>
+    <td><a href="{% url 'edit_reestr' pk=column.pk %}">{{ column.number }}</a></td>
+    <td>{{ column.cod_kp_overall }}</td>
+    <td>{{ column.cod_kp_intervall }}</td>
+    <td>{{ column.name_ip }}</td>
+    <td>{{ column.description_ip }}</td>
+    <td>{{ column.pereodiction_carriage }}</td>
+    <td>{{ column.counting_abillity }}</td>
+    <td contenteditable="true">{{ column.responsible_group }}</td>
+    <td contenteditable="true">{{ column.perforemr_kp }}</td>
+    <td>{{ column.number_complete }}</td>
+    <td>{{ column.number_mistakes }}</td>
+    <td>{{ column.data_object }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+
+{% endblock %}

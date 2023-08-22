@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<html>
+<head>
+    <title>Заполнение таблицы</title>
+</head>
+<body>
+    <h1>Заполните таблицу</h1>
+    <form method="post" action="/">
+        {% csrf_token %}
+        <label for="num_rows">Количество строк:</label>
+        <input type="number" name="num_rows" id="num_rows" required><br><br>
+
+        {% for i in range(num_rows) %}
+
+            <label for="num_{{ i }}">Номер:</label>
+            <input type="text" name="num_{{ i }}" id="num_{{ i }}" value="{{ reestr.num }}" required><br>
+
+            <label for="cod_kp_inter_{{ i }}">Код КП интерфейса:</label>
+            <input type="text" name="cod_kp_inter_{{ i }}" id="cod_kp_inter_{{ i }}" value="{{ reestr.cod_kp_inter }}" required><br>
+
+            <label for="chek_num_{{ i }}">Номер чека:</label>
+            <input type="text" name="chek_num_{{ i }}" id="chek_num_{{ i }}" value="{{ reestr.chek_num }}" required><br>
+
+            <label for="obj_control_{{ i }}">Объект контроля:</label>
+            <input type="text" name="obj_control_{{ i }}" id="obj_control_{{ i }}" value="{{ reestr.obj_control }}" required><br>
+
+            <label for="date_document_{{ i }}">Дата документа:</label>
+            <input type="date" name="date_document_{{ i }}" id="date_document_{{ i }}" value="{{ reestr.date_document }}" required><br>
+
+            <label for="num_document_{{ i }}">Номер документа:</label>
+            <input type="text" name="num_document_{{ i }}" id="num_document_{{ i }}" value="{{ reestr.num_document }}" required><br>
+
+            <label for="colvo_doc_{{ i }}">Количество документов:</label>
+            <input type="number" name="colvo_doc_{{ i }}" id="colvo_doc_{{ i }}" value="{{ reestr.colvo_doc }}" required><br>
+
+            <label for="colvo_errors_{{ i }}">Количество ошибок:</label>
+            <input type="number" name="colvo_errors_{{ i }}" id="colvo_errors_{{ i }}" value="{{ reestr.colvo_errors }}" required><br>
+
+            <label for="notes_{{ i }}">Примечания:</label>
+            <input type="text" name="notes_{{ i }}" id="notes_{{ i }}" value="{{ reestr.notes }}"><br><br>
+        {% endfor %}
+
+        <input type="submit" value="Сохранить">
+    </form>
+</body>
+</html>
+
+{% endblock %}
+
+
