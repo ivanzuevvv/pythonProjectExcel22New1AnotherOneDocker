@@ -4,6 +4,7 @@ from openpyxl.workbook import Workbook
 
 from .forms import CheckListForm, ReestrForm
 from .models import Columns, CheckList, Reestr
+from openpyxl.styles import Font, PatternFill
 
 
 # Create your views here.
@@ -165,19 +166,71 @@ def download_excel(request, pk):
         cell = worksheet.cell(row=1, column=col_num)
         cell.value = header
 
+    header_font = Font(bold=True)
+    header_fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
+
+    # Создание стилей для данных в таблице
+    data_font = Font(bold=False)
+    data_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+
+    # Применение стилей к заголовкам столбцов
+    for col_num, header in enumerate(headers, 1):
+        cell = worksheet.cell(row=1, column=col_num)
+        cell.value = header
+        cell.font = header_font
+        cell.fill = header_fill
+
     # Запись данных из базы данных в таблицу
     worksheet.cell(row=2, column=1).value = checklist.number
+    worksheet.cell(row=2, column=1).font = data_font
+    worksheet.cell(row=2, column=1).fill = data_fill
+
     worksheet.cell(row=2, column=2).value = checklist.cod_kp_overall
-    worksheet.cell(row=2, column=3).value = checklist.cod_kp_intervall
-    worksheet.cell(row=2, column=4).value = checklist.name_ip
-    worksheet.cell(row=2, column=5).value = checklist.description_ip
-    worksheet.cell(row=2, column=6).value = checklist.pereodiction_carriage
-    worksheet.cell(row=2, column=7).value = checklist.counting_abillity
-    worksheet.cell(row=2, column=8).value = checklist.responsible_group
-    worksheet.cell(row=2, column=9).value = checklist.perforemr_kp
-    worksheet.cell(row=2, column=10).value = checklist.number_complete
-    worksheet.cell(row=2, column=11).value = checklist.number_mistakes
-    worksheet.cell(row=2, column=12).value = checklist.data_object
+    worksheet.cell(row=2, column=2).font = data_font
+    worksheet.cell(row=2, column=2).fill = data_fill
+
+    worksheet.cell(row=2, column=2).value = checklist.cod_kp_intervall
+    worksheet.cell(row=2, column=2).font = data_font
+    worksheet.cell(row=2, column=2).fill = data_fill
+
+    worksheet.cell(row=2, column=2).value = checklist.name_ip
+    worksheet.cell(row=2, column=2).font = data_font
+    worksheet.cell(row=2, column=2).fill = data_fill
+
+    worksheet.cell(row=2, column=2).value = checklist.description_ip
+    worksheet.cell(row=2, column=2).font = data_font
+    worksheet.cell(row=2, column=2).fill = data_fill
+
+    worksheet.cell(row=2, column=2).value = checklist.pereodiction_carriage
+    worksheet.cell(row=2, column=2).font = data_font
+    worksheet.cell(row=2, column=2).fill = data_fill
+
+    worksheet.cell(row=2, column=2).value = checklist.counting_abillity
+    worksheet.cell(row=2, column=2).font = data_font
+    worksheet.cell(row=2, column=2).fill = data_fill
+
+    worksheet.cell(row=2, column=2).value = checklist.responsible_group
+    worksheet.cell(row=2, column=2).font = data_font
+    worksheet.cell(row=2, column=2).fill = data_fill
+
+    worksheet.cell(row=2, column=2).value = checklist.perforemr_kp
+    worksheet.cell(row=2, column=2).font = data_font
+    worksheet.cell(row=2, column=2).fill = data_fill
+
+    worksheet.cell(row=2, column=2).value = checklist.number_complete
+    worksheet.cell(row=2, column=2).font = data_font
+    worksheet.cell(row=2, column=2).fill = data_fill
+
+    worksheet.cell(row=2, column=2).value = checklist.number_mistakes
+    worksheet.cell(row=2, column=2).font = data_font
+    worksheet.cell(row=2, column=2).fill = data_fill
+
+    worksheet.cell(row=2, column=2).value = checklist.data_object
+    worksheet.cell(row=2, column=2).font = data_font
+    worksheet.cell(row=2, column=2).fill = data_fill
+
+
+
 
     worksheet.cell(row=15, column=2).value = "Должность:"
     worksheet.cell(row=15, column=5).value = "   Подпись:"
