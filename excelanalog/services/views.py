@@ -4,7 +4,8 @@ from openpyxl.workbook import Workbook
 
 from .forms import CheckListForm, ReestrForm
 from .models import Columns, CheckList, Reestr
-from openpyxl.styles import Font, PatternFill
+from openpyxl.styles import Font, PatternFill, Alignment
+
 
 
 # Create your views here.
@@ -122,38 +123,20 @@ def indexx(request):
         workbook = Workbook()
         sheet = workbook.active
 
-        # Записываем заголовки столбцов
-        headers = ['Номер', 'Код КП интерфейса', 'Номер чека', 'Объект контроля',
-                   'Дата документа', 'Номер документа', 'Количество документов',
-                   'Количество ошибок', 'Примечания']
-        for col_num, header in enumerate(headers, 1):
-            sheet.cell(row=1, column=col_num).value = header
-
-        # Записываем данные из таблицы
-        for row_num, column in enumerate(columns, 2):
-            sheet.cell(row=row_num, column=1).value = column['num']
-            sheet.cell(row=row_num, column=2).value = column['cod_kp_inter']
-            sheet.cell(row=row_num, column=3).value = column['chek_num']
-            sheet.cell(row=row_num, column=4).value = column['obj_control']
-            sheet.cell(row=row_num, column=5).value = column['date_document']
-            sheet.cell(row=row_num, column=6).value = column['num_document']
-            sheet.cell(row=row_num, column=7).value = column['colvo_doc']
-            sheet.cell(row=row_num, column=8).value = column['colvo_errors']
-            sheet.cell(row=row_num, column=9).value = column['notes']
-
-        # Сохраняем Excel-файл
-        workbook.save('реестр.xlsx')
-
-        return render(request, 'index.html')
-
-    return render(request, 'index.html')
 
 
 def download_excel(request, pk):
+    from openpyxl import Workbook
+    from openpyxl.styles import Border, Side
+    from django.shortcuts import get_object_or_404
+    from django.http import HttpResponse
+
     checklist = get_object_or_404(CheckList, pk=pk)
 
     workbook = Workbook()
     worksheet = workbook.active
+
+
 
     # Запись заголовков таблицы
     headers = ['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП',
@@ -166,71 +149,75 @@ def download_excel(request, pk):
         cell = worksheet.cell(row=1, column=col_num)
         cell.value = header
 
-    header_font = Font(bold=True)
-    header_fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
-
-    # Создание стилей для данных в таблице
-    data_font = Font(bold=False)
-    data_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
-
-    # Применение стилей к заголовкам столбцов
-    for col_num, header in enumerate(headers, 1):
-        cell = worksheet.cell(row=1, column=col_num)
-        cell.value = header
-        cell.font = header_font
-        cell.fill = header_fill
-
     # Запись данных из базы данных в таблицу
     worksheet.cell(row=2, column=1).value = checklist.number
-    worksheet.cell(row=2, column=1).font = data_font
-    worksheet.cell(row=2, column=1).fill = data_fill
-
-    worksheet.cell(row=2, column=2).value = checklist.cod_kp_overall
-    worksheet.cell(row=2, column=2).font = data_font
-    worksheet.cell(row=2, column=2).fill = data_fill
+    worksheet.merge_cells('B1:C1')
+    worksheet['B1'] = 'Код КП(общий)'
+    cell.alignment = Alignment(wrap_text=True)
 
     worksheet.cell(row=2, column=2).value = checklist.cod_kp_intervall
-    worksheet.cell(row=2, column=2).font = data_font
-    worksheet.cell(row=2, column=2).fill = data_fill
+    worksheet.merge_cells('D1:E1')
+    worksheet['D1'] = 'Код КП(промеж.)'
+    cell.alignment = Alignment(horizontal='center', vertical='center')
 
-    worksheet.cell(row=2, column=2).value = checklist.name_ip
-    worksheet.cell(row=2, column=2).font = data_font
-    worksheet.cell(row=2, column=2).fill = data_fill
+    worksheet.cell(row=2, column=5).value = checklist.name_ip
+    worksheet.merge_cells('F1')
+    worksheet['F1'] = 'Наименование ИП'
+    cell.alignment = Alignment(wrap_text=True)
 
-    worksheet.cell(row=2, column=2).value = checklist.description_ip
-    worksheet.cell(row=2, column=2).font = data_font
-    worksheet.cell(row=2, column=2).fill = data_fill
+    worksheet.cell(row=2, column=5).value = checklist.description_ip
+    worksheet.merge_cells('H1:I1')
+    worksheet['H1'] = 'Описание КП'
+    cell.alignment = Alignment(wrap_text=True)
 
-    worksheet.cell(row=2, column=2).value = checklist.pereodiction_carriage
-    worksheet.cell(row=2, column=2).font = data_font
-    worksheet.cell(row=2, column=2).fill = data_fill
+    worksheet.cell(row=2, column=6).value = checklist.pereodiction_carriage
+    worksheet.merge_cells('J1:K1')
+    worksheet['J1'] = 'Переодичность проведения'
+    cell.alignment = Alignment(wrap_text=True)
 
-    worksheet.cell(row=2, column=2).value = checklist.counting_abillity
-    worksheet.cell(row=2, column=2).font = data_font
-    worksheet.cell(row=2, column=2).fill = data_fill
+    worksheet.cell(row=2, column=7).value = checklist.counting_abillity
+    worksheet.merge_cells('L1:M1')
+    worksheet['L1'] = 'Способ подсчета результаты проведения КП'
+    cell.alignment = Alignment(wrap_text=True)
 
-    worksheet.cell(row=2, column=2).value = checklist.responsible_group
-    worksheet.cell(row=2, column=2).font = data_font
-    worksheet.cell(row=2, column=2).fill = data_fill
-
-    worksheet.cell(row=2, column=2).value = checklist.perforemr_kp
-    worksheet.cell(row=2, column=2).font = data_font
-    worksheet.cell(row=2, column=2).fill = data_fill
-
-    worksheet.cell(row=2, column=2).value = checklist.number_complete
-    worksheet.cell(row=2, column=2).font = data_font
-    worksheet.cell(row=2, column=2).fill = data_fill
-
-    worksheet.cell(row=2, column=2).value = checklist.number_mistakes
-    worksheet.cell(row=2, column=2).font = data_font
-    worksheet.cell(row=2, column=2).fill = data_fill
-
-    worksheet.cell(row=2, column=2).value = checklist.data_object
-    worksheet.cell(row=2, column=2).font = data_font
-    worksheet.cell(row=2, column=2).fill = data_fill
+    worksheet.cell(row=2, column=8).value = checklist.responsible_group
+    worksheet.merge_cells('N1:O1')
+    worksheet['N1'] = 'Подразделение, ответственное за проведение контрольной процедуры'
+    cell.alignment = Alignment(wrap_text=True)
 
 
+    worksheet.cell(row=2, column=9).value = checklist.perforemr_kp
+    worksheet.merge_cells('P1:Q1')
+    worksheet['P1'] = 'Исполнитель КП'
+    cell.alignment = Alignment(wrap_text=True)
 
+    worksheet.cell(row=2, column=10).value = checklist.number_complete
+    worksheet.merge_cells('R1:S1')
+    worksheet['R1'] = 'Количество выполненых КП'
+    cell.alignment = Alignment(wrap_text=True)
+
+    worksheet.cell(row=2, column=11).value = checklist.number_mistakes
+    worksheet.merge_cells('T1:U1')
+    worksheet['T1'] = 'Количество выявленных ошибок'
+    cell.alignment = Alignment(wrap_text=True)
+
+    worksheet.cell(row=2, column=12).value = checklist.data_object
+    worksheet.merge_cells('V1:W1')
+    worksheet['V1'] = 'сведения об объекте контроля'
+    cell.alignment = Alignment(wrap_text=True)
+
+    # Создание стиля границы
+    border_style = Border(left=Side(border_style="thin", color="000000"),
+                          right=Side(border_style="thin", color="000000"),
+                          top=Side(border_style="thin", color="000000"),
+                          bottom=Side(border_style="thin", color="000000")
+                          )
+
+    # Применение стиля границы к ячейкам
+    for i in range(1, 20):
+        for column in worksheet.iter_cols(min_row=1, max_row=15, min_col=i, max_col=i + 8):
+            for cell in column:
+                cell.border = border_style
 
     worksheet.cell(row=15, column=2).value = "Должность:"
     worksheet.cell(row=15, column=5).value = "   Подпись:"
@@ -244,7 +231,14 @@ def download_excel(request, pk):
 
 
 
+
+
+
 def download_excel1(request, pk):
+    from openpyxl import Workbook
+    from openpyxl.styles import Border, Side
+    from django.shortcuts import get_object_or_404
+    from django.http import HttpResponse
     checklist = get_object_or_404(Reestr, pk=pk)
 
     workbook = Workbook()
@@ -271,6 +265,18 @@ def download_excel1(request, pk):
     worksheet.cell(row=2, column=7).value = checklist.colvo_doc
     worksheet.cell(row=2, column=8).value = checklist.colvo_errors
     worksheet.cell(row=2, column=9).value = checklist.notes
+
+    border_style = Border(left=Side(border_style="thin", color="000000"),
+                          right=Side(border_style="thin", color="000000"),
+                          top=Side(border_style="thin", color="000000"),
+                          bottom=Side(border_style="thin", color="000000")
+                          )
+
+    # Применение стиля границы к ячейкам
+    for i in range(1, 12):
+        for column in worksheet.iter_cols(min_row=1, max_row=15, min_col=i, max_col=i + 3):
+            for cell in column:
+                cell.border = border_style
 
 
     worksheet.cell(row=15, column=2).value = "Должность:"
