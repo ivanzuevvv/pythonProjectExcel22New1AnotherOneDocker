@@ -1,5 +1,7 @@
+import openpyxl
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from openpyxl.utils import get_column_letter
 from openpyxl.workbook import Workbook
 
 from .forms import CheckListForm, ReestrForm
@@ -130,6 +132,8 @@ def download_excel(request, pk):
     from openpyxl.styles import Border, Side
     from django.shortcuts import get_object_or_404
     from django.http import HttpResponse
+    from openpyxl.styles import Alignment
+    from openpyxl import Workbook
 
     checklist = get_object_or_404(CheckList, pk=pk)
 
@@ -137,6 +141,9 @@ def download_excel(request, pk):
     worksheet = workbook.active
 
 
+
+    # Сохранение файла
+    workbook.save('example.xlsx')
 
     # Запись заголовков таблицы
     headers = ['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП',
@@ -149,61 +156,66 @@ def download_excel(request, pk):
         cell = worksheet.cell(row=1, column=col_num)
         cell.value = header
 
+    thin_border = Border(top=Side(border_style="thin"))
+
     # Запись данных из базы данных в таблицу
+
+
     worksheet.cell(row=2, column=1).value = checklist.number
-    worksheet.merge_cells('B1:C1')
+    worksheet.merge_cells('B1')
     worksheet['B1'] = 'Код КП(общий)'
     cell.alignment = Alignment(wrap_text=True)
 
     worksheet.cell(row=2, column=2).value = checklist.cod_kp_intervall
-    worksheet.merge_cells('D1:E1')
-    worksheet['D1'] = 'Код КП(промеж.)'
-    cell.alignment = Alignment(horizontal='center', vertical='center')
+    worksheet.merge_cells('C1')
+    worksheet['C1'] = 'Код КП(промеж.)'
+    cell.alignment = Alignment(wrap_text=True)
 
-    worksheet.cell(row=2, column=5).value = checklist.name_ip
+    worksheet.cell(row=2, column=3).value = checklist.name_ip
+    worksheet.merge_cells('D1')
+    worksheet['D1'] = 'Наименование ИП'
+    cell.alignment = Alignment(wrap_text=True)
+
+    worksheet.cell(row=2, column=4).value = checklist.description_ip
+    worksheet.merge_cells('E1')
+    worksheet['E1'] = 'Описание КП'
+    cell.alignment = Alignment(wrap_text=True)
+
+    worksheet.cell(row=2, column=5).value = checklist.pereodiction_carriage
     worksheet.merge_cells('F1')
-    worksheet['F1'] = 'Наименование ИП'
+    worksheet['F1'] = 'Переодичность проведения'
     cell.alignment = Alignment(wrap_text=True)
 
-    worksheet.cell(row=2, column=5).value = checklist.description_ip
-    worksheet.merge_cells('H1:I1')
-    worksheet['H1'] = 'Описание КП'
+    worksheet.cell(row=2, column=6).value = checklist.counting_abillity
+    worksheet.merge_cells('G1')
+    worksheet['G1'] = 'Способ подсчета результаты проведения КП'
     cell.alignment = Alignment(wrap_text=True)
 
-    worksheet.cell(row=2, column=6).value = checklist.pereodiction_carriage
-    worksheet.merge_cells('J1:K1')
-    worksheet['J1'] = 'Переодичность проведения'
-    cell.alignment = Alignment(wrap_text=True)
-
-    worksheet.cell(row=2, column=7).value = checklist.counting_abillity
-    worksheet.merge_cells('L1:M1')
-    worksheet['L1'] = 'Способ подсчета результаты проведения КП'
-    cell.alignment = Alignment(wrap_text=True)
-
-    worksheet.cell(row=2, column=8).value = checklist.responsible_group
-    worksheet.merge_cells('N1:O1')
-    worksheet['N1'] = 'Подразделение, ответственное за проведение контрольной процедуры'
+    worksheet.cell(row=2, column=7).value = checklist.responsible_group
+    worksheet.merge_cells('H1')
+    worksheet['H1'] = 'Подразделение, ответственное за проведение контрольной процедуры'
     cell.alignment = Alignment(wrap_text=True)
 
 
-    worksheet.cell(row=2, column=9).value = checklist.perforemr_kp
-    worksheet.merge_cells('P1:Q1')
-    worksheet['P1'] = 'Исполнитель КП'
+    worksheet.cell(row=2, column=8).value = checklist.perforemr_kp
+    worksheet.merge_cells('I1')
+    worksheet['I1'] = 'Исполнитель КП'
     cell.alignment = Alignment(wrap_text=True)
 
-    worksheet.cell(row=2, column=10).value = checklist.number_complete
-    worksheet.merge_cells('R1:S1')
-    worksheet['R1'] = 'Количество выполненых КП'
+    row = 2
+    worksheet.cell(row=row, column=9).value = checklist.number_complete
+    worksheet.merge_cells('J1')
+    worksheet['J1'] = 'Количество выполненых КП'
     cell.alignment = Alignment(wrap_text=True)
 
-    worksheet.cell(row=2, column=11).value = checklist.number_mistakes
-    worksheet.merge_cells('T1:U1')
-    worksheet['T1'] = 'Количество выявленных ошибок'
+    worksheet.cell(row=2, column=10).value = checklist.number_mistakes
+    worksheet.merge_cells('K1')
+    worksheet['K1'] = 'Количество выявленных ошибок'
     cell.alignment = Alignment(wrap_text=True)
 
-    worksheet.cell(row=2, column=12).value = checklist.data_object
-    worksheet.merge_cells('V1:W1')
-    worksheet['V1'] = 'сведения об объекте контроля'
+    worksheet.cell(row=2, column=11).value = checklist.data_object
+    worksheet.merge_cells('L1')
+    worksheet['L1'] = 'сведения об объекте контроля'
     cell.alignment = Alignment(wrap_text=True)
 
     # Создание стиля границы
@@ -213,9 +225,66 @@ def download_excel(request, pk):
                           bottom=Side(border_style="thin", color="000000")
                           )
 
+    # Автоматическое расширение столбцов
+    for column in worksheet.columns:
+        max_length = 10
+        column_letter = get_column_letter(column[1].column)
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = 25
+
+        worksheet.column_dimensions[column_letter].width = adjusted_width
+
+        # Автоматическое расширение строк
+        for row in worksheet.rows:
+            max_length = 10
+            for cell in row:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(cell.value)
+                except:
+                    pass
+            adjusted_height = max_length + 2
+
+            #        alignment = Alignment(horizontal='center', vertical='center')
+            alignment = Alignment(horizontal='centerContinuous', vertical='center')
+
+            for cell in worksheet[row[1].column]:
+                worksheet.row_dimensions[cell.row].height = adjusted_height
+                cell.alignment = alignment
+
+        # Автоматическое расширение строк
+        for row in worksheet.rows:
+            max_length = 10
+            for cell in row:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(cell.value)
+                except:
+                    pass
+            adjusted_height = 50
+            alignment = Alignment(horizontal='center', vertical='center')
+
+            for cell in worksheet[row[0].column]:
+                worksheet.row_dimensions[cell.row].height = adjusted_height
+                cell.alignment = alignment
+
+
+    # Сохранение файла
+    workbook.save('example.xlsx')
+
+
+
+    # Сохранение файла
+
+
     # Применение стиля границы к ячейкам
-    for i in range(1, 20):
-        for column in worksheet.iter_cols(min_row=1, max_row=15, min_col=i, max_col=i + 8):
+    for i in range(1, 14):
+        for column in worksheet.iter_cols(min_row=1, max_row=2, min_col=i, max_col=i + 4):
             for cell in column:
                 cell.border = border_style
 
@@ -245,7 +314,7 @@ def download_excel1(request, pk):
     worksheet = workbook.active
 
     # Запись заголовков таблицы
-    headers = ['номер п/п', 'Код КП(промежуточный)', 'номер чек листа', 'Обьект контроля', 'Дата документа',
+    headers = ['номер п/п', 'Код КП(промежуточный)', 'Исполнитель ИП', 'номер чек листа', 'Обьект контроля', 'Дата документа',
                'Номер документа',
                'Количество документов/операций',
                'Количество ошибок/нарушений',
@@ -257,14 +326,22 @@ def download_excel1(request, pk):
 
     # Запись данных из базы данных в таблицу
     worksheet.cell(row=2, column=1).value = checklist.num
+
+
     worksheet.cell(row=2, column=2).value = checklist.cod_kp_inter
-    worksheet.cell(row=2, column=3).value = checklist.chek_num
-    worksheet.cell(row=2, column=4).value = checklist.obj_control
-    worksheet.cell(row=2, column=5).value = checklist.date_document
-    worksheet.cell(row=2, column=6).value = checklist.num_document
-    worksheet.cell(row=2, column=7).value = checklist.colvo_doc
-    worksheet.cell(row=2, column=8).value = checklist.colvo_errors
-    worksheet.cell(row=2, column=9).value = checklist.notes
+    worksheet.merge_cells('B1')
+    worksheet['B1'] = 'Код КП(промежуточный)'
+    cell.alignment = Alignment(wrap_text=True)
+    worksheet.cell(row=2, column=3).value = checklist.performer_ip
+    worksheet.cell(row=2, column=4).value = checklist.chek_num
+    worksheet.cell(row=2, column=5).value = checklist.obj_control
+    worksheet.cell(row=2, column=6).value = checklist.date_document
+    worksheet.cell(row=2, column=7).value = checklist.num_document
+    worksheet.cell(row=2, column=8).value = checklist.colvo_doc
+    worksheet.cell(row=2, column=9).value = checklist.colvo_errors
+    worksheet.cell(row=2, column=10).value = checklist.notes
+
+    total_errors = 0  # Инициализация переменной для суммирования ошибок
 
     border_style = Border(left=Side(border_style="thin", color="000000"),
                           right=Side(border_style="thin", color="000000"),
@@ -272,15 +349,36 @@ def download_excel1(request, pk):
                           bottom=Side(border_style="thin", color="000000")
                           )
 
+    # Автоматическое расширение столбцов
+    for column in worksheet.columns:
+        max_length = 0
+        column_letter = get_column_letter(column[0].column)
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        worksheet.column_dimensions[column_letter].width = adjusted_width
+
+    # Автоматическое расширение строк
+
+
     # Применение стиля границы к ячейкам
-    for i in range(1, 12):
-        for column in worksheet.iter_cols(min_row=1, max_row=15, min_col=i, max_col=i + 3):
+    for i in range(1, 8):
+        for column in worksheet.iter_cols(min_row=1, max_row=25, min_col=i, max_col=i + 3):
             for cell in column:
                 cell.border = border_style
 
 
-    worksheet.cell(row=15, column=2).value = "Должность:"
-    worksheet.cell(row=15, column=5).value = "   Подпись:"
+
+
+    # Установка значений для "Должность" и "Подпись"
+    worksheet.cell(row=28, column=2).value = "_________________________"
+    worksheet.cell(row=29, column=2).value = "               (должность)"
+    worksheet.cell(row=28, column=6).value = "_________________"
+    worksheet.cell(row=29, column=6).value = "         (подпись)"
 
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -288,3 +386,5 @@ def download_excel1(request, pk):
     workbook.save(response)
 
     return response
+
+

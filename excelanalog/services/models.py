@@ -33,6 +33,8 @@ class CheckList(models.Model):
 class Reestr(models.Model):
     num = models.CharField(max_length=500, blank=True, null=True, verbose_name="номер п/п")
     cod_kp_inter = models.CharField(max_length=500, blank=True, null=True, verbose_name="Код КП(промежуточный)")
+    performer_ip = models.CharField(max_length=500, blank=True, null=True, verbose_name="Исполнитель ИП")
+
     chek_num = models.CharField(max_length=500, blank=True, null=True, verbose_name="номер чек листа")
     obj_control = models.CharField(max_length=500, blank=True, null=True, verbose_name="Обьект контроля")
     date_document = models.CharField(max_length=500, blank=True, null=True, verbose_name="Дата документа")
