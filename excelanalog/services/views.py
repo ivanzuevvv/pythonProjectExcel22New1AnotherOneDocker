@@ -160,63 +160,63 @@ def download_excel(request, pk):
 
     # Запись данных из базы данных в таблицу
 
-
     worksheet.cell(row=2, column=1).value = checklist.number
     worksheet.merge_cells('B1')
     worksheet['B1'] = 'Код КП(общий)'
-    cell.alignment = Alignment(wrap_text=True)
+    worksheet['B1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
     worksheet.cell(row=2, column=2).value = checklist.cod_kp_intervall
     worksheet.merge_cells('C1')
     worksheet['C1'] = 'Код КП(промеж.)'
-    cell.alignment = Alignment(wrap_text=True)
+    worksheet['C1'].alignment = openpyxl.styles.Alignment(wrap_text=True)
+
 
     worksheet.cell(row=2, column=3).value = checklist.name_ip
-    worksheet.merge_cells('D1')
-    worksheet['D1'] = 'Наименование ИП'
-    cell.alignment = Alignment(wrap_text=True)
+    worksheet.merge_cells('D2')
+    worksheet['D2'].alignment = Alignment(wrap_text=True)
+    worksheet.cell(row=2, column=3).alignment = openpyxl.styles.Alignment(wrap_text=True)
+
 
     worksheet.cell(row=2, column=4).value = checklist.description_ip
     worksheet.merge_cells('E1')
     worksheet['E1'] = 'Описание КП'
-    cell.alignment = Alignment(wrap_text=True)
+    worksheet['E1'].alignment = openpyxl.styles.Alignment(wrap_text=True)
 
     worksheet.cell(row=2, column=5).value = checklist.pereodiction_carriage
     worksheet.merge_cells('F1')
     worksheet['F1'] = 'Переодичность проведения'
-    cell.alignment = Alignment(wrap_text=True)
+    worksheet['F1'].alignment = openpyxl.styles.Alignment(wrap_text=True)
 
     worksheet.cell(row=2, column=6).value = checklist.counting_abillity
     worksheet.merge_cells('G1')
     worksheet['G1'] = 'Способ подсчета результаты проведения КП'
-    cell.alignment = Alignment(wrap_text=True)
+    worksheet['G1'].alignment = openpyxl.styles.Alignment(wrap_text=True)
 
     worksheet.cell(row=2, column=7).value = checklist.responsible_group
     worksheet.merge_cells('H1')
     worksheet['H1'] = 'Подразделение, ответственное за проведение контрольной процедуры'
-    cell.alignment = Alignment(wrap_text=True)
-
+    worksheet['H1'].alignment = openpyxl.styles.Alignment(wrap_text=True)
 
     worksheet.cell(row=2, column=8).value = checklist.perforemr_kp
     worksheet.merge_cells('I1')
     worksheet['I1'] = 'Исполнитель КП'
-    cell.alignment = Alignment(wrap_text=True)
+    worksheet['I1'].alignment = openpyxl.styles.Alignment(wrap_text=True)
 
-    row = 2
-    worksheet.cell(row=row, column=9).value = checklist.number_complete
+    worksheet.cell(row=2, column=9).value = checklist.number_complete
     worksheet.merge_cells('J1')
-    worksheet['J1'] = 'Количество выполненых КП'
-    cell.alignment = Alignment(wrap_text=True)
+    worksheet['J1'] = 'Количество выполненных КП'
+    worksheet['J1'].alignment = openpyxl.styles.Alignment(wrap_text=True)
 
     worksheet.cell(row=2, column=10).value = checklist.number_mistakes
     worksheet.merge_cells('K1')
     worksheet['K1'] = 'Количество выявленных ошибок'
-    cell.alignment = Alignment(wrap_text=True)
+    worksheet['K1'].alignment = openpyxl.styles.Alignment(wrap_text=True)
 
     worksheet.cell(row=2, column=11).value = checklist.data_object
     worksheet.merge_cells('L1')
-    worksheet['L1'] = 'сведения об объекте контроля'
-    cell.alignment = Alignment(wrap_text=True)
+    worksheet['L1'] = ''
+
+
 
     # Создание стиля границы
     border_style = Border(left=Side(border_style="thin", color="000000"),
@@ -227,52 +227,34 @@ def download_excel(request, pk):
 
     # Автоматическое расширение столбцов
     for column in worksheet.columns:
-        max_length = 10
+        max_length = 12
         column_letter = get_column_letter(column[1].column)
         for cell in column:
             try:
                 if len(str(cell.value)) > max_length:
                     max_length = len(cell.value)
+
             except:
                 pass
         adjusted_width = 25
-
         worksheet.column_dimensions[column_letter].width = adjusted_width
 
-        # Автоматическое расширение строк
-        for row in worksheet.rows:
-            max_length = 10
-            for cell in row:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(cell.value)
-                except:
-                    pass
-            adjusted_height = max_length + 2
 
-            #        alignment = Alignment(horizontal='center', vertical='center')
-            alignment = Alignment(horizontal='centerContinuous', vertical='center')
 
-            for cell in worksheet[row[1].column]:
-                worksheet.row_dimensions[cell.row].height = adjusted_height
-                cell.alignment = alignment
+    for row in worksheet.rows:
+        max_length = 12
+        for cell in row:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_height = 350
+        alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
 
-        # Автоматическое расширение строк
-        for row in worksheet.rows:
-            max_length = 10
-            for cell in row:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(cell.value)
-                except:
-                    pass
-            adjusted_height = 50
-            alignment = Alignment(horizontal='center', vertical='center')
-
-            for cell in worksheet[row[0].column]:
-                worksheet.row_dimensions[cell.row].height = adjusted_height
-                cell.alignment = alignment
-
+        for cell in worksheet[row[1].column]:
+            worksheet.row_dimensions[cell.row].height = adjusted_height
+            cell.alignment = alignment
 
     # Сохранение файла
     workbook.save('example.xlsx')
@@ -283,8 +265,8 @@ def download_excel(request, pk):
 
 
     # Применение стиля границы к ячейкам
-    for i in range(1, 14):
-        for column in worksheet.iter_cols(min_row=1, max_row=2, min_col=i, max_col=i + 4):
+    for i in range(1, 15):
+        for column in worksheet.iter_cols(min_row=1, max_row=2, min_col=i, max_col=i + 5):
             for cell in column:
                 cell.border = border_style
 
