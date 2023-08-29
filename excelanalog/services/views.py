@@ -28,11 +28,20 @@ def base(request):
         column7_data = request.POST.get('column7')
         column8_data = request.POST.get('column8')
         column9_data = request.POST.get('column9')
+        column10_data = request.POST.get('column10')
+        column11_data = request.POST.get('column11')
+        column12_data = request.POST.get('column12')
+        column13_data = request.POST.get('column13')
+        column14_data = request.POST.get('column14')
+        column15_data = request.POST.get('column15')
 
         # Создаем новый объект модели Columns с введенными данными
         new_column = Columns(column1=column1_data, column2=column2_data, column3=column3_data,
                              column4=column4_data, column5=column5_data, column6=column6_data,
-                             column7=column7_data, column8=column8_data, column9=column9_data)
+                             column7=column7_data, column8=column8_data, column9=column9_data,
+                             column10=column10_data,
+                             column11=column11_data, column12=column12_data, column13=column13_data, column14=column14_data, column15=column15_data,
+                             )
         new_column.save()
 
     # Получаем все объекты модели Columns
@@ -280,9 +289,20 @@ def download_excel(request, pk):
             for cell in column:
                 cell.border = border_style
 
-    worksheet.cell(row=15, column=2).value = "Должность:"
-    worksheet.cell(row=15, column=5).value = "   Подпись:"
-    worksheet.cell(row=15, column=7).value = "           ФИО:"
+
+    worksheet.cell(row=14, column=2).value = "_____________________"
+    worksheet.cell(row=15, column=2).value = "            (должность)"
+    worksheet.cell(row=14, column=4).value = "_____________________"
+    worksheet.cell(row=15, column=4).value = "             (подпись)"
+    worksheet.cell(row=14, column=6).value = "_____________________"
+    worksheet.cell(row=15, column=6).value = "                (ФИО)"
+    worksheet.cell(row=14, column=8).value = "______________________"
+    worksheet.cell(row=15, column=8).value = "                (дата)"
+    worksheet.cell(row=7, column=9).value = "_____________________________________"
+    worksheet.cell(row=8, column=9).value = "                (наименование филиала)"
+    worksheet.cell(row=7, column=12).value = "_____________________"
+    worksheet.cell(row=8, column=12).value = "   Код отдела/службы"
+
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=checklist.xlsx'

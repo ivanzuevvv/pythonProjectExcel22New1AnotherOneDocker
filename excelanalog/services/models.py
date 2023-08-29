@@ -11,6 +11,12 @@ class Columns(models.Model):
     column7 = models.CharField(max_length=500, blank=True, null=True, verbose_name="Столб-7")
     column8 = models.CharField(max_length=500, blank=True, null=True, verbose_name="Столб-8")
     column9 = models.CharField(max_length=500, blank=True, null=True, verbose_name="Столб-9")
+    column10 = models.CharField(max_length=500, blank=True, null=True, verbose_name="Столб-10")
+    column11 = models.CharField(max_length=500, blank=True, null=True, verbose_name="Столб-11")
+    column12 = models.CharField(max_length=500, blank=True, null=True, verbose_name="Столб-12")
+    column13 = models.CharField(max_length=500, blank=True, null=True, verbose_name="Столб-13")
+    column14 = models.CharField(max_length=500, blank=True, null=True, verbose_name="Столб-14")
+    column15 = models.CharField(max_length=500, blank=True, null=True, verbose_name="Столб-15")
 
 
 

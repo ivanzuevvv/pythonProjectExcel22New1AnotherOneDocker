@@ -3,10 +3,20 @@
 {% block content %}
 
 
+<input type="text" id="searchInput" placeholder="Поиск " style="width: 100%; height: 50px; border: 1px solid black; margin: auto; text-align: center;">
+
+
 
 
 <table class="table table-bordered">
   <tr>
+      <th>№ п/п</th>
+    <th>Код КП (промежуточный)</th>
+    <th>Код КП (общий)</th>
+    <th>Наименование КП</th>
+    <th>Направление выявления риска</th>
+    <th>Описание проведения контрольной процедуры
+(с 01.04.2023)</th>
     <th>Документ, подтверждающий сведение контрольной процедуры</th>
     <th>Подразделение, ответственное за выполнение контрольной процедуры</th>
     <th>Должность ответственного за выполнение контрольной процедуры</th>
@@ -22,17 +32,35 @@
 
 
 <td><a href="{% url 'download_excel' column.pk %}">{{ column.column1 }}</a></td>
-<td><a href="{% url 'download_excel' column.pk %}">{{ column.column2 }}</a></td>
-<td><a href="{% url 'download_excel' column.pk %}">{{ column.column3 }}</a></td>
-<td><a href="{% url 'download_excel1' column.pk %}">{{ column.column4 }}</a></td>
+<td><a href="{% url 'download_excel1' column.pk %}">{{ column.column2 }}</a></td>
+<td>{{ column.column3 }}</td>
+<td>{{ column.column4 }}</td>
     <td>{{ column.column5 }}</td>
     <td>{{ column.column6 }}</td>
     <td>{{ column.column7 }}</td>
     <td>{{ column.column8 }}</td>
     <td>{{ column.column9 }}</td>
+      <td>{{ column.column10 }}</td>
+    <td>{{ column.column11 }}</td>
+    <td>{{ column.column12 }}</td>
+    <td>{{ column.column13 }}</td>
+    <td>{{ column.column14 }}</td>
+      <td>{{ column.column15 }}</td>
 
 </tr>
   {% endfor %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#searchInput').on('keyup', function() {
+      var value = $(this).val().toLowerCase();
+      $('table tr').filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+    });
+  });
+</script>
+
     </table>
 {% endblock %}
 
