@@ -32,7 +32,7 @@ class CheckList(models.Model):
     perforemr_kp = models.CharField(max_length=500, blank=True, null=True, verbose_name="Исполнитель КП")
     number_complete = models.CharField(max_length=500, blank=True, null=True, verbose_name="Количество выполненых КП")
     number_mistakes = models.CharField(max_length=500, blank=True, null=True, verbose_name="Количество выявленных ошибок")
-    data_object = models.CharField(max_length=500, blank=True, null=True, verbose_name="сведения об объекте контроля")
+#    data_object = models.CharField(max_length=500, blank=True, null=True, verbose_name="сведения об объекте контроля")
     cheklist = models.ForeignKey(Columns, on_delete=models.CASCADE)
 
 

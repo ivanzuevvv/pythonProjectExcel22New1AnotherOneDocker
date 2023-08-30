@@ -3,7 +3,7 @@
 {% block content %}
 
 
-<input type="text" id="searchInput" placeholder="Поиск " style="width: 100%; height: 50px; border: 1px solid black; margin: auto; text-align: center;">
+<input type="text" id="searchInput" placeholder="Поиск " style="width: 125%; height: 50px; border: 1px solid black; margin: auto;  text-align: center;">
 
 
 
@@ -49,13 +49,14 @@
 
 </tr>
   {% endfor %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   $(document).ready(function() {
     $('#searchInput').on('keyup', function() {
       var value = $(this).val().toLowerCase();
       $('table tr').filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        $(this).toggle($(this).find('td:first').text().toLowerCase().indexOf(value) > -1)
       });
     });
   });

@@ -66,7 +66,7 @@ def checklist_detail(request, pk):
     # Запись заголовков таблицы
     headers = ['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП', 'Переодичность проведения',
                'Способ подсчета результаты проведения КП', 'Подразделение, ответственное за проведение контрольной процедуры',
-               'Исполнитель КП', 'Количество выполненых КП', 'Количество выявленных ошибок', 'сведения об объекте контроля']
+               'Исполнитель КП', 'Количество выполненых КП', 'Количество выявленных ошибок']
     for col_num, header in enumerate(headers, 1):
         cell = worksheet.cell(row=1, column=col_num)
         cell.value = header
@@ -83,7 +83,7 @@ def checklist_detail(request, pk):
         worksheet.cell(row=row_num, column=9).value = column.perforemr_kp
         worksheet.cell(row=row_num, column=10).value = column.number_complete
         worksheet.cell(row=row_num, column=11).value = column.number_mistakes
-        worksheet.cell(row=row_num, column=12).value = column.data_object
+#        worksheet.cell(row=row_num, column=12).value = column.data_object
     # Сохранение файла Excel
 
 
@@ -155,17 +155,7 @@ def download_excel(request, pk):
     workbook.save('example.xlsx')
 
     # Запись заголовков таблицы
-    headers = ['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП',
-               'Переодичность проведения',
-               'Способ подсчета результаты проведения КП',
-               'Подразделение, ответственное за проведение контрольной процедуры',
-               'Исполнитель КП', 'Количество выполненых КП', 'Количество выявленных ошибок',
-               'сведения об объекте контроля']
-    for col_num, header in enumerate(headers, 1):
-        cell = worksheet.cell(row=1, column=col_num)
-        cell.value = header
 
-    thin_border = Border(top=Side(border_style="thin"))
 
     # Запись данных из базы данных в таблицу
 
@@ -174,67 +164,63 @@ def download_excel(request, pk):
     worksheet['A1'] = 'номер п/п'
     worksheet['A1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=2).value = checklist.number
+    worksheet.cell(row=2, column=2).value = checklist.cod_kp_overall
     worksheet.merge_cells('B1')
     worksheet['B1'] = 'Код КП(общий)'
     worksheet['B1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=3).value = checklist.number
+
+    worksheet.cell(row=2, column=3).value = checklist.cod_kp_intervall
     worksheet.merge_cells('C1')
-    worksheet['C1'] = 'Код КП(общий)'
+    worksheet['C1'] = 'Код КП(Промежуточный)'
     worksheet['C1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=4).value = checklist.cod_kp_intervall
+
+    worksheet.cell(row=2, column=4).value = checklist.name_ip
     worksheet.merge_cells('D1')
-    worksheet['D1'] = 'Код КП(промеж.)'
+    worksheet['D1'] = 'Наименования КП'
     worksheet['D1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
 
-    worksheet.cell(row=2, column=5).value = checklist.name_ip
-    worksheet.merge_cells('E2')
-    worksheet['E1'] = 'Наименование ИП'
+    worksheet.cell(row=2, column=5).value = checklist.description_ip
+    worksheet.merge_cells('E1')
+    worksheet['E1'] = 'Описание КП'
     worksheet['E1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-
-    worksheet.cell(row=2, column=6).value = checklist.description_ip
+    worksheet.cell(row=2, column=6).value = checklist.pereodiction_carriage
     worksheet.merge_cells('F1')
-    worksheet['F1'] = 'Описание КП'
+    worksheet['F1'] = 'Периодичность проведения (ежедневно/ ежеквартально/ежемесячно/по мере поступления и т.д)'
     worksheet['F1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=7).value = checklist.pereodiction_carriage
+    worksheet.cell(row=2, column=7).value = checklist.counting_abillity
     worksheet.merge_cells('G1')
-    worksheet['G1'] = 'Переодичность проведения'
+    worksheet['G1'] = 'Способ подсчета результаты  проведения КП (ручной/автоматизированный)'
     worksheet['G1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=8).value = checklist.counting_abillity
+    worksheet.cell(row=2, column=8).value = checklist.responsible_group
     worksheet.merge_cells('H1')
-    worksheet['H1'] = 'Способ подсчета результаты проведения КП'
+    worksheet['H1'] = 'Подразделение, ответственное за выполнение контрольной процедуры'
     worksheet['H1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=9).value = checklist.responsible_group
+    worksheet.cell(row=2, column=9).value = checklist.perforemr_kp
     worksheet.merge_cells('I1')
-    worksheet['I1'] = 'Подразделение, ответственное за проведение контрольной процедуры'
+    worksheet['I1'] = 'Исполнитель КП (ФИО) '
     worksheet['I1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=10).value = checklist.perforemr_kp
+    worksheet.cell(row=2, column=10).value = checklist.number_complete
     worksheet.merge_cells('J1')
-    worksheet['J1'] = 'Исполнитель КП'
+    worksheet['J1'] = 'Количество выполненных КП'
     worksheet['J1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=11).value = checklist.number_complete
+    worksheet.cell(row=2, column=11).value = checklist.number_mistakes
     worksheet.merge_cells('K1')
-    worksheet['K1'] = 'Количество выполненных КП'
+    worksheet['K1'] = 'Количество выявленных ошибок/ нарушений'
     worksheet['K1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=12).value = checklist.number_mistakes
-    worksheet.merge_cells('L1')
-    worksheet['L1'] = 'Количество выявленных ошибок'
-    worksheet['L1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
-
-    worksheet.cell(row=2, column=13).value = checklist.data_object
-    worksheet.merge_cells('M1')
-    worksheet['M1'] = 'сведения об объекте контроля'
-    worksheet['M1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+#    worksheet.cell(row=2, column=13).value = checklist.data_object
+#    worksheet.merge_cells('M1')
+#    worksheet['M1'] = 'сведения об объекте контроля'
+#    worksheet['M1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
 
     # Создание стиля границы
@@ -284,7 +270,7 @@ def download_excel(request, pk):
 
 
     # Применение стиля границы к ячейкам
-    for i in range(1, 10):
+    for i in range(1, 8):
         for column in worksheet.iter_cols(min_row=1, max_row=2, min_col=i, max_col=i + 4):
             for cell in column:
                 cell.border = border_style
@@ -298,10 +284,10 @@ def download_excel(request, pk):
     worksheet.cell(row=15, column=6).value = "                (ФИО)"
     worksheet.cell(row=14, column=8).value = "______________________"
     worksheet.cell(row=15, column=8).value = "                (дата)"
-    worksheet.cell(row=7, column=9).value = "_____________________________________"
-    worksheet.cell(row=8, column=9).value = "                (наименование филиала)"
-    worksheet.cell(row=7, column=12).value = "_____________________"
-    worksheet.cell(row=8, column=12).value = "   Код отдела/службы"
+    worksheet.cell(row=7, column=8).value = "_____________________________________"
+    worksheet.cell(row=8, column=8).value = "                (наименование филиала)"
+    worksheet.cell(row=7, column=11).value = "_____________________"
+    worksheet.cell(row=8, column=11).value = "   Код отдела/службы"
 
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -326,11 +312,11 @@ def download_excel1(request, pk):
     worksheet = workbook.active
 
     # Запись заголовков таблицы
-    headers = ['номер п/п', 'Код КП(промежуточный)', 'Исполнитель ИП', 'номер чек листа', 'Обьект контроля', 'Дата документа',
+    headers = ['№ п/п', 'Код КП(промежуточный)', 'Исполнитель ИП', 'номер чек листа', 'Объект контроля (договор, акт, счет-фактура, КС-2 и др.)', 'Дата документа',
                'Номер документа',
                'Количество документов/операций',
                'Количество ошибок/нарушений',
-               'Примечаний',
+               'Примечание',
                ]
     for col_num, header in enumerate(headers, 1):
         cell = worksheet.cell(row=1, column=col_num)
@@ -343,6 +329,7 @@ def download_excel1(request, pk):
     worksheet.cell(row=2, column=2).value = checklist.cod_kp_inter
     worksheet.merge_cells('B1')
     worksheet['B1'] = 'Код КП(промежуточный)'
+    worksheet['B1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
     cell.alignment = Alignment(wrap_text=True)
     worksheet.cell(row=2, column=3).value = checklist.performer_ip
     worksheet.cell(row=2, column=4).value = checklist.chek_num
@@ -389,6 +376,8 @@ def download_excel1(request, pk):
     # Установка значений для "Должность" и "Подпись"
     worksheet.cell(row=28, column=2).value = "_________________________"
     worksheet.cell(row=29, column=2).value = "               (должность)"
+    worksheet.cell(row=28, column=4).value = "_______________________"
+    worksheet.cell(row=29, column=4).value = "               (ФИО)"
     worksheet.cell(row=28, column=6).value = "_________________"
     worksheet.cell(row=29, column=6).value = "         (подпись)"
 

@@ -38,8 +38,9 @@
 
 </style>
 
-<a class="navbar-brand mr-auto d-flex align-items-center bg-primary text-white navbar-brand" href="{% url 'index' %}" style="pointer-events: none;">
-  <img src="{% static 'services/images/logo.jpg' %}" height="50" width="80" alt="Логотип" class="mr-3 ml-3">
+<a href="{% url 'index' %}" style="pointer-events: none;">
+
+  <img src="{% static 'services/images/logo.jpg' %}" height="20" width="20" alt="Логотип" class="mr-3 ml-3">
   <div class="d-flex flex-column align-items-start">
     <span class="text-white">АИС Повышение надежности систем автоматизации</span>
     <small class="text-white">Отдел АСУТП САиМО ИТЦ</small>
@@ -51,7 +52,7 @@
 
 
  <!-- навигационное меню -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<nav class="navbar navbar-dark bg-primary fixed-top">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
