@@ -159,63 +159,63 @@ def download_excel(request, pk):
 
     # Запись данных из базы данных в таблицу
 
-    worksheet.cell(row=2, column=1).value = checklist.number
-    worksheet.merge_cells('A1')
-    worksheet['A1'] = 'номер п/п'
-    worksheet['A1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+    worksheet.cell(row=9, column=1).value = checklist.number
+    worksheet.merge_cells('A8')
+    worksheet['A8'] = 'номер п/п'
+    worksheet['A8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=2).value = checklist.cod_kp_overall
-    worksheet.merge_cells('B1')
-    worksheet['B1'] = 'Код КП(общий)'
-    worksheet['B1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
-
-
-    worksheet.cell(row=2, column=3).value = checklist.cod_kp_intervall
-    worksheet.merge_cells('C1')
-    worksheet['C1'] = 'Код КП(Промежуточный)'
-    worksheet['C1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+    worksheet.cell(row=9, column=2).value = checklist.cod_kp_overall
+    worksheet.merge_cells('B8')
+    worksheet['B8'] = 'Код КП(общий)'
+    worksheet['B8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
 
-    worksheet.cell(row=2, column=4).value = checklist.name_ip
-    worksheet.merge_cells('D1')
-    worksheet['D1'] = 'Наименования КП'
-    worksheet['D1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+    worksheet.cell(row=9, column=3).value = checklist.cod_kp_intervall
+    worksheet.merge_cells('C8')
+    worksheet['C8'] = 'Код КП(Промежуточный)'
+    worksheet['C8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
 
-    worksheet.cell(row=2, column=5).value = checklist.description_ip
-    worksheet.merge_cells('E1')
-    worksheet['E1'] = 'Описание КП'
-    worksheet['E1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+    worksheet.cell(row=9, column=4).value = checklist.name_ip
+    worksheet.merge_cells('D5')
+    worksheet['D8'] = 'Наименования КП'
+    worksheet['D8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=6).value = checklist.pereodiction_carriage
-    worksheet.merge_cells('F1')
-    worksheet['F1'] = 'Периодичность проведения (ежедневно/ ежеквартально/ежемесячно/по мере поступления и т.д)'
-    worksheet['F1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=7).value = checklist.counting_abillity
-    worksheet.merge_cells('G1')
-    worksheet['G1'] = 'Способ подсчета результаты  проведения КП (ручной/автоматизированный)'
-    worksheet['G1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+    worksheet.cell(row=9, column=5).value = checklist.description_ip
+    worksheet.merge_cells('E8')
+    worksheet['E8'] = 'Описание КП'
+    worksheet['E8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=8).value = checklist.responsible_group
-    worksheet.merge_cells('H1')
-    worksheet['H1'] = 'Подразделение, ответственное за выполнение контрольной процедуры'
-    worksheet['H1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+    worksheet.cell(row=9, column=6).value = checklist.pereodiction_carriage
+    worksheet.merge_cells('F8')
+    worksheet['F8'] = 'Периодичность проведения (ежедневно/ ежеквартально/ежемесячно/по мере поступления и т.д)'
+    worksheet['F8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=9).value = checklist.perforemr_kp
-    worksheet.merge_cells('I1')
-    worksheet['I1'] = 'Исполнитель КП (ФИО) '
-    worksheet['I1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+    worksheet.cell(row=9, column=7).value = checklist.counting_abillity
+    worksheet.merge_cells('G8')
+    worksheet['G8'] = 'Способ подсчета результаты  проведения КП (ручной/автоматизированный)'
+    worksheet['G8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=10).value = checklist.number_complete
-    worksheet.merge_cells('J1')
-    worksheet['J1'] = 'Количество выполненных КП'
-    worksheet['J1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+    worksheet.cell(row=9, column=8).value = checklist.responsible_group
+    worksheet.merge_cells('H8')
+    worksheet['H8'] = 'Подразделение, ответственное за выполнение контрольной процедуры'
+    worksheet['H8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet.cell(row=2, column=11).value = checklist.number_mistakes
-    worksheet.merge_cells('K1')
-    worksheet['K1'] = 'Количество выявленных ошибок/ нарушений'
-    worksheet['K1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+    worksheet.cell(row=9, column=9).value = checklist.perforemr_kp
+    worksheet.merge_cells('I8')
+    worksheet['I8'] = 'Исполнитель КП (ФИО) '
+    worksheet['I8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+    worksheet.cell(row=9, column=10).value = checklist.number_complete
+    worksheet.merge_cells('J8')
+    worksheet['J8'] = 'Количество выполненных КП'
+    worksheet['J8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+    worksheet.cell(row=9, column=11).value = checklist.number_mistakes
+    worksheet.merge_cells('K8')
+    worksheet['K8'] = 'Количество выявленных ошибок/ нарушений'
+    worksheet['K8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
 #    worksheet.cell(row=2, column=13).value = checklist.data_object
 #    worksheet.merge_cells('M1')
@@ -233,7 +233,7 @@ def download_excel(request, pk):
     # Автоматическое расширение столбцов
     for column in worksheet.columns:
         max_length = 15
-        column_letter = get_column_letter(column[1].column)
+        column_letter = get_column_letter(column[8].column)
         for cell in column:
             try:
                 if len(str(cell.value)) > max_length:
@@ -257,7 +257,7 @@ def download_excel(request, pk):
         adjusted_height = 400
         alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
 
-        for cell in worksheet[row[1].column]:
+        for cell in worksheet[row[8].column]:
             worksheet.row_dimensions[cell.row].height = adjusted_height
             cell.alignment = alignment
 
@@ -271,7 +271,7 @@ def download_excel(request, pk):
 
     # Применение стиля границы к ячейкам
     for i in range(1, 8):
-        for column in worksheet.iter_cols(min_row=1, max_row=2, min_col=i, max_col=i + 4):
+        for column in worksheet.iter_cols(min_row=8, max_row=9, min_col=i, max_col=i + 4):
             for cell in column:
                 cell.border = border_style
 
@@ -284,17 +284,24 @@ def download_excel(request, pk):
     worksheet.cell(row=15, column=6).value = "                (ФИО)"
     worksheet.cell(row=14, column=8).value = "______________________"
     worksheet.cell(row=15, column=8).value = "                (дата)"
-    worksheet.cell(row=7, column=8).value = "_____________________________________"
-    worksheet.cell(row=8, column=8).value = "                (наименование филиала)"
-    worksheet.cell(row=7, column=11).value = "_____________________"
-    worksheet.cell(row=8, column=11).value = "   Код отдела/службы"
-
+    worksheet.cell(row=3, column=8).value = "_____________________________________"
+    worksheet.cell(row=4, column=8).value = "                (наименование филиала)"
+    worksheet.cell(row=2, column=11).value = "_____________________"
+    worksheet.cell(row=3, column=11).value = "   Код отдела/службы"
+    worksheet.cell(row=7, column=5).value = "          Чек-лист за"
+    worksheet.cell(row=7, column=5).font = worksheet.cell(row=7, column=5).font.copy(bold=True)
+    worksheet.cell(row=7, column=6).value = " "
+    worksheet.cell(row=7, column=6).font = worksheet.cell(row=7, column=6).font.copy(bold=True)
+    worksheet.cell(row=7, column=7).value = "            2023г."
+    worksheet.cell(row=7, column=7).font = worksheet.cell(row=7, column=7).font.copy(bold=True)
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=checklist.xlsx'
     workbook.save(response)
 
     return response
+
+
 
 
 
@@ -319,26 +326,26 @@ def download_excel1(request, pk):
                'Примечание',
                ]
     for col_num, header in enumerate(headers, 1):
-        cell = worksheet.cell(row=1, column=col_num)
+        cell = worksheet.cell(row=3, column=col_num)
         cell.value = header
 
     # Запись данных из базы данных в таблицу
-    worksheet.cell(row=2, column=1).value = checklist.num
+    worksheet.cell(row=4, column=1).value = checklist.num
 
 
-    worksheet.cell(row=2, column=2).value = checklist.cod_kp_inter
-    worksheet.merge_cells('B1')
-    worksheet['B1'] = 'Код КП(промежуточный)'
-    worksheet['B1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+    worksheet.cell(row=4, column=2).value = checklist.cod_kp_inter
+#    worksheet.merge_cells('B3')
+#    worksheet['B3'] = 'Код КП(промежуточный)'
+#    worksheet['B3'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
     cell.alignment = Alignment(wrap_text=True)
-    worksheet.cell(row=2, column=3).value = checklist.performer_ip
-    worksheet.cell(row=2, column=4).value = checklist.chek_num
-    worksheet.cell(row=2, column=5).value = checklist.obj_control
-    worksheet.cell(row=2, column=6).value = checklist.date_document
-    worksheet.cell(row=2, column=7).value = checklist.num_document
-    worksheet.cell(row=2, column=8).value = checklist.colvo_doc
-    worksheet.cell(row=2, column=9).value = checklist.colvo_errors
-    worksheet.cell(row=2, column=10).value = checklist.notes
+    worksheet.cell(row=4, column=3).value = checklist.performer_ip
+    worksheet.cell(row=4, column=4).value = checklist.chek_num
+    worksheet.cell(row=4, column=5).value = checklist.obj_control
+    worksheet.cell(row=4, column=6).value = checklist.date_document
+    worksheet.cell(row=4, column=7).value = checklist.num_document
+    worksheet.cell(row=4, column=8).value = checklist.colvo_doc
+    worksheet.cell(row=4, column=9).value = checklist.colvo_errors
+    worksheet.cell(row=4, column=10).value = checklist.notes
 
     total_errors = 0  # Инициализация переменной для суммирования ошибок
 
@@ -351,7 +358,7 @@ def download_excel1(request, pk):
     # Автоматическое расширение столбцов
     for column in worksheet.columns:
         max_length = 0
-        column_letter = get_column_letter(column[0].column)
+        column_letter = get_column_letter(column[3].column)
         for cell in column:
             try:
                 if len(str(cell.value)) > max_length:
@@ -366,7 +373,7 @@ def download_excel1(request, pk):
 
     # Применение стиля границы к ячейкам
     for i in range(1, 8):
-        for column in worksheet.iter_cols(min_row=1, max_row=25, min_col=i, max_col=i + 3):
+        for column in worksheet.iter_cols(min_row=3, max_row=25, min_col=i, max_col=i + 3):
             for cell in column:
                 cell.border = border_style
 
@@ -374,6 +381,8 @@ def download_excel1(request, pk):
 
 
     # Установка значений для "Должность" и "Подпись"
+    worksheet.cell(row=2, column=5).value = "                      Реестр обьектов контроля"
+    worksheet.cell(row=2, column=5).font = worksheet.cell(row=2, column=5).font.copy(bold=True)
     worksheet.cell(row=28, column=2).value = "_________________________"
     worksheet.cell(row=29, column=2).value = "               (должность)"
     worksheet.cell(row=28, column=4).value = "_______________________"
