@@ -333,6 +333,11 @@ def download_excel(request, pk):
     worksheet2.cell(row=4, column=7).value = checklist2.num_document
     worksheet2.cell(row=4, column=8).value = checklist2.colvo_doc
     worksheet2.cell(row=4, column=9).value = checklist2.colvo_errors
+    # Задаем формулу суммирования
+    last_row = worksheet2.max_row
+    sum_formula = f"=SUM(I:I)"
+    worksheet2.cell(row=last_row + 10, column=9).value = sum_formula
+
     worksheet2.cell(row=4, column=10).value = checklist2.notes
 
     total_errors = 0  # Инициализация переменной для суммирования ошибок
