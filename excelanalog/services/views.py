@@ -7,7 +7,7 @@ from openpyxl.workbook import Workbook
 from .forms import CheckListForm, ReestrForm
 from .models import Columns, CheckList, Reestr
 from openpyxl.styles import Font, PatternFill, Alignment
-
+from openpyxl.worksheet.datavalidation import DataValidation
 
 
 # Create your views here.
@@ -144,6 +144,7 @@ def download_excel(request, pk):
     from openpyxl.styles import Alignment
     from openpyxl import Workbook
 
+
     checklist1 = get_object_or_404(CheckList, pk=pk)
     checklist2 = get_object_or_404(Reestr, pk=pk)
 
@@ -160,6 +161,29 @@ def download_excel(request, pk):
 
     # Запись данных из базы данных в таблицу
     worksheet1 = workbook.active
+
+    # Задаем список значений для выпадающего списка
+    worksheet1.merge_cells('H3:I3')
+
+    # Задаем список значений для выпадающего списка
+    values = ['АУП', 'Югорское УМТС и К', 'УОВОФ', 'Надымское УАВР', 'Югорское УАВР', 'Белоярское УАВР',
+              'Надымское УТТиСТ', 'Югорское УТТиСТ', 'Белоярское УТТиСТ', 'ИТЦ', 'Учебно-производственный центр',
+               ]
+
+    # Создаем объект DataValidation
+    data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values)))
+
+    # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
+    worksheet1.add_data_validation(data_validation)
+    data_validation.add(worksheet1['H3'])
+    data_validation.add(worksheet1['I3'])
+
+    # Сохраняем изменения в файл
+
+
+
+    workbook.save('example.xlsx')
+
 
     worksheet1.cell(row=9, column=1).value = checklist1.number
     worksheet1.merge_cells('A8')
@@ -209,12 +233,14 @@ def download_excel(request, pk):
     worksheet1['I8'] = 'Исполнитель КП (ФИО)'
     worksheet1['I8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet1.cell(row=9, column=10).value = checklist1.number_complete
+#    worksheet1.cell(row=9, column=10).value = checklist1.number_complete   =Sheet2!H24
+    worksheet1.cell(row=9, column=10).value = "=Sheet2!H24"
     worksheet1.merge_cells('J8')
     worksheet1['J8'] = 'Количество выполненных КП'
     worksheet1['J8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet1.cell(row=9, column=11).value = checklist1.number_mistakes
+#    worksheet1.cell(row=9, column=11).value = checklist1.number_mistakes  =Sheet2!I24
+    worksheet1.cell(row=9, column=11).value = "=Sheet2!I24"
     worksheet1.merge_cells('K8')
     worksheet1['K8'] = 'Количество выявленных ошибок/ нарушений'
     worksheet1['K8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
@@ -325,27 +351,32 @@ def download_excel(request, pk):
     #    worksheet['B3'] = 'Код КП(промежуточный)'
     #    worksheet['B3'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
     cell.alignment = Alignment(wrap_text=True)
-    worksheet2.cell(row=4, column=3).value ="=Лист1!I9"
+    worksheet2.cell(row=4, column=3).value ="=Sheet!I9"
 
     worksheet2.cell(row=4, column=4).value = checklist2.chek_num
     worksheet2.cell(row=4, column=5).value = checklist2.obj_control
     worksheet2.cell(row=4, column=6).value = checklist2.date_document
     worksheet2.cell(row=4, column=7).value = checklist2.num_document
     worksheet2.cell(row=4, column=8).value = checklist2.colvo_doc
+
+
+    last_row1 = worksheet2.max_row
+    sum_formula1 = f"=SUM(H1:H23)"
+    worksheet2.cell(row=last_row1 + 20, column=8).value = sum_formula1
     worksheet2.cell(row=4, column=9).value = checklist2.colvo_errors
+
     # Задаем формулу суммирования
     last_row = worksheet2.max_row
-    sum_formula = f"=SUM(I:I)"
-    worksheet2.cell(row=last_row + 10, column=9).value = sum_formula
-
-    worksheet2.cell(row=4, column=10).value = checklist2.notes
+    sum_formula = f"=SUM(I1:I23)"
+    worksheet2.cell(row=last_row , column=9).value = sum_formula
+    worksheet2.cell(row=4, column=8).value = checklist2.notes
 
     total_errors = 0  # Инициализация переменной для суммирования ошибок
 
     border_style = Border(left=Side(border_style="thin", color="000000"),
                           right=Side(border_style="thin", color="000000"),
                           top=Side(border_style="thin", color="000000"),
-                          bottom=Side(border_style="thin", color="000000")
+#                          bottom=Side(border_style="thin", color="000000")
                           )
 
     # Автоматическое расширение столбцов
