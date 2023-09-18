@@ -8,11 +8,103 @@ from .forms import CheckListForm, ReestrForm
 from .models import Columns, CheckList, Reestr
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.worksheet.datavalidation import DataValidation
+import pandas as pd
+from openpyxl.styles import Border, Side
+
+
+# Создание пустого DataFrame для свода
+
+
 
 
 # Create your views here.
 def index(request):
     return render(request, 'base.html')
+
+
+
+def svod(request):
+    if request.method == 'POST':
+        files = request.FILES.getlist('files')  # Получение списка загруженных файлов
+
+        # Создание пустого сводного DataFrame для первого листа
+        summary_df1 = pd.DataFrame(
+            columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП',
+                     'Переодичность проведения', 'Способ подсчета результаты проведения КП',
+                     'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                     'Количество выполненых КП', 'Количество выявленных ошибок'])
+
+        # Создание пустого сводного DataFrame для второго листа
+        summary_df2 = pd.DataFrame(columns=['№ п/п', 'Код КП(промежуточный)', 'Исполнитель ИП', 'номер чек листа',
+                                            'Объект контроля (договор, акт, счет-фактура, КС-2 и др.)',
+                                            'Дата документа', 'Номер документа', 'Количество документов/операций',
+                                            'Количество ошибок/нарушений', 'Примечание'])
+
+        # Обработка каждого загруженного файла
+        for file in files:
+            # Чтение первого листа файла и взятие только значений
+            df1 = pd.read_excel(file, sheet_name='Sheet', usecols="A:K", header=None, skiprows=8, nrows=1)
+            df1 = df1.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП',
+                                'Переодичность проведения', 'Способ подсчета результаты проведения КП',
+                                'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                                'Количество выполненых КП', 'Количество выявленных ошибок', ], axis=1)
+
+            df1.drop(['Способ подсчета результаты проведения КП', 'Описание КП', 'Переодичность проведения'], axis=1, inplace=True)
+            df1 = df1.reset_index(drop=True)
+            df1 = df1.rename_axis([None], axis=1)
+            summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
+
+            # Чтение второго листа файла и взятие только значений
+            df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=1)
+            summary_df2 = pd.concat([summary_df2, df2], ignore_index=True)
+
+        # Создание нового файла Excel с двумя листами
+        with pd.ExcelWriter('summary.xlsx', engine='openpyxl') as writer:
+            summary_df1.to_excel(writer, sheet_name='Sheet', index=False)
+            summary_df2.to_excel(writer, sheet_name='Sheet2', index=False)
+
+            # Получение объекта workbook
+            workbook = writer.book
+
+            # Получение объекта worksheet для первого листа
+            worksheet1 = writer.sheets['Sheet']
+
+            worksheet1.delete_cols(5, 3)  # Удаление столбиков с индексами 5, 6 и 7
+            worksheet1.insert_rows(1, 12)  # Опускание таблицы на 12 строк ниже начиная с первой строки
+            worksheet1.cell(row=1, column=2).value = "Сводный реестр контрольных процедур"
+            worksheet1.cell(row=2, column=2).value = " "
+            worksheet1.cell(row=3, column=2).value = "_____________________________________"
+            worksheet1.cell(row=4, column=2).value = "(наименование филиала/отдела)"
+
+            # Автоматическое расширение столбцов для первого листа
+            for row in range(worksheet1.max_row, 0, -1):
+                max_length = 0
+                for cell in worksheet1[row]:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                worksheet1.row_dimensions[row].height = max_length
+
+                # Установка выравнивания для каждой ячейки в строке
+                for cell in worksheet1[row]:
+                    cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
+
+                # Установка выравнивания для каждой ячейки в строке
+
+            # Получение объекта worksheet для второго листа
+            worksheet2 = writer.sheets['Sheet']
+
+            # Автоматическое расширение столбцов для второго листа
+            for column_cells in worksheet2.columns:
+                length = max(len(str(cell.value)) for cell in column_cells)
+                worksheet2.column_dimensions[column_cells[0].column_letter].width = length
+
+        file_path = 'summary.xlsx'  # Путь к файлу
+        with open(file_path, 'rb') as file:
+            response = HttpResponse(file.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename=summary.xlsx'
+            return response
+
+    return render(request, 'svod.html')  # Отображение шаблона "upload.html".
 
 
 
@@ -151,14 +243,6 @@ def download_excel(request, pk):
 
     workbook = Workbook()
 
-
-
-    # Сохранение файла
-
-
-    # Запись заголовков таблицы
-
-
     # Запись данных из базы данных в таблицу
     worksheet1 = workbook.active
 
@@ -177,9 +261,6 @@ def download_excel(request, pk):
     worksheet1.add_data_validation(data_validation)
     data_validation.add(worksheet1['H3'])
     data_validation.add(worksheet1['I3'])
-
-    # Сохраняем изменения в файл
-
 
 
     workbook.save('example.xlsx')
@@ -245,12 +326,6 @@ def download_excel(request, pk):
     worksheet1['K8'] = 'Количество выявленных ошибок/ нарушений'
     worksheet1['K8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-#    worksheet.cell(row=2, column=13).value = checklist.data_object
-#    worksheet.merge_cells('M1')
-#    worksheet['M1'] = 'сведения об объекте контроля'
-#    worksheet['M1'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
-
-
     # Создание стиля границы
     border_style = Border(left=Side(border_style="thin", color="000000"),
                           right=Side(border_style="thin", color="000000"),
@@ -273,7 +348,6 @@ def download_excel(request, pk):
         worksheet1.column_dimensions[column_letter].width = adjusted_width
 
 
-
     for row in worksheet1.rows:
         max_length = 15
         for cell in row:
@@ -293,17 +367,11 @@ def download_excel(request, pk):
     workbook.save('example.xlsx')
 
 
-
-    # Сохранение файла
-
-
     # Применение стиля границы к ячейкам
     for i in range(1, 8):
         for column in worksheet1.iter_cols(min_row=8, max_row=9, min_col=i, max_col=i + 4):
             for cell in column:
                 cell.border = border_style
-
-
 
 
     worksheet1.cell(row=14, column=2).value = "_____________________"
@@ -324,9 +392,6 @@ def download_excel(request, pk):
     worksheet1.cell(row=7, column=6).font = worksheet1.cell(row=7, column=6).font.copy(bold=True)
     worksheet1.cell(row=7, column=7).value = "            2023г."
     worksheet1.cell(row=7, column=7).font = worksheet1.cell(row=7, column=7).font.copy(bold=True)
-
-
-
 
 
     worksheet2 = workbook.create_sheet(title='Sheet2')
@@ -411,8 +476,6 @@ def download_excel(request, pk):
     worksheet2.cell(row=29, column=6).value = "         (подпись)"
 
 
-
-
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=checklist.xlsx'
     workbook.save(response)
@@ -425,13 +488,6 @@ def on_change(worksheet1, worksheet2):
 
 # Вызов функции on_change при изменении значения в ячейке worksheet1.cell(row=4, column=3)
     worksheet1.cell(row=4, column=3).add_observer(on_change, worksheet1, worksheet2)
-
-
-
-
-
-
-
 
 
 def download_excel1(request, pk):

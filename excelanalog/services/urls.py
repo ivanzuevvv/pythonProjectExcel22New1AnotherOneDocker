@@ -10,6 +10,7 @@ urlpatterns = [
     path('checklist/<int:pk>/', checklist_detail, name='checklist_detail'),
     path('reestr/<int:pk>/', edit_reestr, name='edit_reestr'),
     path('kk/', indexx, name='indexx'),
+    path('kkk/', svod, name='svod'),
     path('checklist/<int:pk>/download/', download_excel, name='download_excel'),
     path('checklist1/<int:pk>/download/', download_excel1, name='download_excel1')
 

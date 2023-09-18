@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<html>
+<head>
+    <title>Загрузка файлов</title>
+</head>
+<body>
+    <form action="{% url 'svod' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="files" multiple>
+
+
+        <input type="submit" value="Загрузить">
+    </form>
+</body>
+</html>
+{% endblock %}
+
