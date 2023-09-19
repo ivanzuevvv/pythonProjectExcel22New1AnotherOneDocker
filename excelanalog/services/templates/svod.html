@@ -2,19 +2,43 @@
 
 {% block content %}
 
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<style>
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 20vh;
+
+
+    }
+</style>
+
+
+
 <html>
 <head>
     <title>Загрузка файлов</title>
 </head>
 <body>
-    <form action="{% url 'svod' %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="files" multiple>
+    <div class="center">
+
+     <form action="{% url 'svod' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="files" multiple class="btn btn-primary">
 
 
-        <input type="submit" value="Загрузить">
+
+
+        <button type="submit" class="btn btn-primary">Загрузить</button>
+
     </form>
+    </div>
+
 </body>
 </html>
 {% endblock %}
+
+
 

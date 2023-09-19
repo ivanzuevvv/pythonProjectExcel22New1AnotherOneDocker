@@ -55,7 +55,15 @@ def svod(request):
             summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
 
             # Чтение второго листа файла и взятие только значений
-            df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=1)
+            df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=3, nrows=5)
+            df2 = df2.set_axis(['№ п/п', 'Код КП(промежуточный)', 'Исполнитель ИП', 'номер чек листа',
+                                            'Объект контроля (договор, акт, счет-фактура, КС-2 и др.)',
+                                            'Дата документа', 'Номер документа', 'Количество документов/операций',
+                                            'Количество ошибок/нарушений', 'Примечание'], axis=1)
+
+
+            df2 = df2.reset_index(drop=True)
+            df2 = df2.rename_axis([None], axis=1)
             summary_df2 = pd.concat([summary_df2, df2], ignore_index=True)
 
         # Создание нового файла Excel с двумя листами
@@ -97,6 +105,10 @@ def svod(request):
             for column_cells in worksheet2.columns:
                 length = max(len(str(cell.value)) for cell in column_cells)
                 worksheet2.column_dimensions[column_cells[0].column_letter].width = length
+
+
+                for cell in worksheet1[row]:
+                    cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
 
         file_path = 'summary.xlsx'  # Путь к файлу
         with open(file_path, 'rb') as file:
