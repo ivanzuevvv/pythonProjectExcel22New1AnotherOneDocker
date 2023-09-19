@@ -92,6 +92,10 @@ def svod(request):
                         max_length = len(str(cell.value))
                 worksheet1.row_dimensions[row].height = max_length
 
+                for column_cells in worksheet1.columns:
+                    length = max(len(str(cell.value)) for cell in column_cells)
+                    worksheet1.column_dimensions[column_cells[0].column_letter].width = length
+
                 # Установка выравнивания для каждой ячейки в строке
                 for cell in worksheet1[row]:
                     cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
@@ -99,7 +103,7 @@ def svod(request):
                 # Установка выравнивания для каждой ячейки в строке
 
             # Получение объекта worksheet для второго листа
-            worksheet2 = writer.sheets['Sheet']
+            worksheet2 = writer.sheets['Sheet2']
 
             # Автоматическое расширение столбцов для второго листа
             for column_cells in worksheet2.columns:
@@ -107,7 +111,8 @@ def svod(request):
                 worksheet2.column_dimensions[column_cells[0].column_letter].width = length
 
 
-                for cell in worksheet1[row]:
+
+                for cell in worksheet2[row]:
                     cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
 
         file_path = 'summary.xlsx'  # Путь к файлу
