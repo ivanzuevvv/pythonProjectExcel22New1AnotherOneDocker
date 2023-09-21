@@ -1,3 +1,8 @@
+
+
+
+import os
+
 import openpyxl
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -40,6 +45,12 @@ def svod(request):
                                             'Дата документа', 'Номер документа', 'Количество документов/операций',
                                             'Количество ошибок/нарушений', 'Примечание'])
 
+        summary_df3 = pd.DataFrame(
+            columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование контрольной процедуры', 'Описание КП',
+                     'Переодичность проведения', 'Способ подсчета результаты проведения КП',
+                     'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                     'Количество выполненых КП', 'Количество выявленных ошибок'])
+
         # Обработка каждого загруженного файла
         for file in files:
             # Чтение первого листа файла и взятие только значений
@@ -49,7 +60,14 @@ def svod(request):
                                 'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
                                 'Количество выполненых КП', 'Количество выявленных ошибок', ], axis=1)
 
-            df1.drop(['Способ подсчета результаты проведения КП', 'Описание КП', 'Переодичность проведения'], axis=1, inplace=True)
+            # Получение имени файла без расширения
+            file_name = os.path.splitext(file.name)[0]
+
+            # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
+            df1['Документ'] = file_name
+
+            df1.drop(['Способ подсчета результаты проведения КП', 'Описание КП', 'Переодичность проведения'], axis=1,
+                     inplace=True)
             df1 = df1.reset_index(drop=True)
             df1 = df1.rename_axis([None], axis=1)
             summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
@@ -61,15 +79,44 @@ def svod(request):
                                             'Дата документа', 'Номер документа', 'Количество документов/операций',
                                             'Количество ошибок/нарушений', 'Примечание'], axis=1)
 
+            ########################################
+            sum_docs = df2['Количество документов/операций'].sum()
+            sum_errors = df2['Количество ошибок/нарушений'].sum()
 
+            # Создаем новый DataFrame с суммами
+
+            ##########################################
             df2 = df2.reset_index(drop=True)
             df2 = df2.rename_axis([None], axis=1)
             summary_df2 = pd.concat([summary_df2, df2], ignore_index=True)
+
+
+
+
+            df3 = pd.read_excel(file, sheet_name='Sheet', usecols="A:K", header=None, skiprows=8, nrows=1)
+            df3 = df3.set_axis(
+                ['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование контрольной процедуры', 'Описание КП',
+                     'Переодичность проведения', 'Способ подсчета результаты проведения КП',
+                     'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                     'Количество выполненых КП', 'Количество выявленных ошибок'], axis=1)
+
+            file_name3 = 'Чек-лист/Реестр объектов контроля'
+
+            # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
+            df3['Документ, подтверждающий проведение контрольной процедуры'] = file_name3
+
+            df3.drop(['Код КП(промежуточный)', 'Описание КП', 'Переодичность проведения', 'Способ подсчета результаты проведения КП', 'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП'], axis=1,
+                     inplace=True)
+            df3 = df3.reset_index(drop=True)
+            df3 = df3.rename_axis([None], axis=1)
+            summary_df3 = pd.concat([summary_df3, df3], ignore_index=True)
+
 
         # Создание нового файла Excel с двумя листами
         with pd.ExcelWriter('summary.xlsx', engine='openpyxl') as writer:
             summary_df1.to_excel(writer, sheet_name='Sheet', index=False)
             summary_df2.to_excel(writer, sheet_name='Sheet2', index=False)
+            summary_df3.to_excel(writer, sheet_name='Sheet3', index=False)
 
             # Получение объекта workbook
             workbook = writer.book
@@ -77,12 +124,57 @@ def svod(request):
             # Получение объекта worksheet для первого листа
             worksheet1 = writer.sheets['Sheet']
 
+            values = ['АУП', 'Югорское УМТС и К', 'УОВОФ', 'Надымское УАВР', 'Югорское УАВР', 'Белоярское УАВР',
+                      'Надымское УТТиСТ', 'Югорское УТТиСТ', 'Белоярское УТТиСТ', 'ИТЦ',
+                      'Учебно-производственный центр',
+                      ]
+
+            # Создаем объект DataValidation
+            data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values)))
+
+            # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
+            worksheet1.add_data_validation(data_validation)
+            data_validation.add(worksheet1['D3'])
+
+            values2 = ['За Декабрь 2023г', 'За Январь 2023г', 'За Февраль 2023г', 'За Март 2023г', 'За Апрель 2023г', 'За Май 2023г',
+                      'За Июнь 2023г', 'За Июль 2023г', 'За Август 2023г', 'За Сентябрь 2023г',
+                      'За Октябрь 2023г', 'За Ноябрь 2023г',
+                      ]
+
+            # Создаем объект DataValidation
+            data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values2)))
+
+            # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
+            worksheet1.add_data_validation(data_validation)
+            data_validation.add(worksheet1['D7'])
+
+            # Запись значения по умолчанию в ячейку B2
+
+
+            # Сохранение файла Excel
+            table_end_row = worksheet1.max_row
+
             worksheet1.delete_cols(5, 3)  # Удаление столбиков с индексами 5, 6 и 7
             worksheet1.insert_rows(1, 12)  # Опускание таблицы на 12 строк ниже начиная с первой строки
-            worksheet1.cell(row=1, column=2).value = "Сводный реестр контрольных процедур"
-            worksheet1.cell(row=2, column=2).value = " "
-            worksheet1.cell(row=3, column=2).value = "_____________________________________"
-            worksheet1.cell(row=4, column=2).value = "(наименование филиала/отдела)"
+            worksheet1.cell(row=1, column=4).value = "Сводный реестр контрольных процедур"
+            worksheet1.cell(row=2, column=4).value = " "
+            worksheet1.cell(row=3, column=4).value = "_____________________________________"
+            worksheet1.cell(row=4, column=4).value = "наименование филиала/отдела)"
+            worksheet1.cell(row=6, column=4).value = "осуществляемых в целях налогового мониторинга"
+            worksheet1.cell(row=7, column=4).value = "________________________________"
+
+            worksheet1.cell(row=table_end_row + 14, column=2).value = "________________________________"
+            worksheet1.cell(row=table_end_row + 14, column=4).value = "________________________________"
+            worksheet1.cell(row=table_end_row + 14, column=6).value = "________________________________"
+
+            worksheet1.cell(row=table_end_row + 15, column=2).value = "должность"
+            worksheet1.cell(row=table_end_row + 15, column=4).value = "подпись"
+            worksheet1.cell(row=table_end_row + 15, column=6).value = "ФИО"
+
+
+
+            workbook.save("example.xlsx")
+
 
             # Автоматическое расширение столбцов для первого листа
             for row in range(worksheet1.max_row, 0, -1):
@@ -102,9 +194,26 @@ def svod(request):
 
                 # Установка выравнивания для каждой ячейки в строке
 
+
+
+                # Установка выравнивания для каждой ячейки в строке
             # Получение объекта worksheet для второго листа
             worksheet2 = writer.sheets['Sheet2']
+            # Опускание таблицы на 2 строк ниже начиная с первой строки
+            worksheet2.insert_rows(1, 2)
+            worksheet2.cell(row=2, column=5).value = "Реестр объектов контроля"
+            ##################################################
 
+            last_row1 = worksheet2.max_row
+            sum_formula1 = f"=SUM(H1:H23)"
+            worksheet2.cell(row=last_row1 + 20, column=8).value = sum_formula1
+
+
+            last_row = worksheet2.max_row
+            sum_formula = f"=SUM(I1:I23)"
+            worksheet2.cell(row=last_row, column=9).value = sum_formula
+
+            ###############################################################
             # Автоматическое расширение столбцов для второго листа
             for column_cells in worksheet2.columns:
                 length = max(len(str(cell.value)) for cell in column_cells)
@@ -114,6 +223,45 @@ def svod(request):
 
                 for cell in worksheet2[row]:
                     cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
+
+
+            # Получение объекта worksheet для третьего листа
+            worksheet3 = writer.sheets['Sheet3']
+
+
+
+            # Удаление столбиков с индексами 5, 6 и 7
+
+
+            worksheet3.delete_cols(3)
+
+
+            worksheet3.delete_cols(4)
+            worksheet3.delete_cols(4)
+
+
+            worksheet3.delete_cols(5)
+            worksheet3.delete_cols(5)
+
+            worksheet3.delete_cols(4)
+
+
+
+            # После удаления столбка 4, столбок 6 станет столбком 7
+
+
+
+            # Автоматическое расширение столбцов для второго листа
+            for column_cells in worksheet3.columns:
+                length = max(len(str(cell.value)) for cell in column_cells)
+                worksheet3.column_dimensions[column_cells[0].column_letter].width = length
+
+                for cell in worksheet3[row]:
+                    cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
+
+
+
+
 
         file_path = 'summary.xlsx'  # Путь к файлу
         with open(file_path, 'rb') as file:
