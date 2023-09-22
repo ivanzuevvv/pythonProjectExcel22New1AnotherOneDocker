@@ -9,47 +9,43 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 20vh;
-
-
+        height: 19vh;
     }
 
+    h1 {
+        text-align: center;
+        font-weight: bold;
+        font-size: 30px;
+    }
 
-        h1 {
-            text-align: center;
-            font-weight: bold;
-            font-size: 30px;
-        }
-
-
+    .instructions {
+        text-align: center;
+        margin-top: 20px;
+        padding: 20px;
+        color: black;
+    }
 </style>
 
+<div class="center">
+    <h1>Сводный реестр</h1>
+</div>
 
-
-
-<html>
-<head>
-    <h1>Сводный реестр </h1>
-    <title>Загрузка файлов</title>
-</head>
-<body>
-    <div class="center">
-
-     <form action="{% url 'svod' %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="file" name="files" multiple class="btn btn-primary">
-
-
-
-
+<div class="center">
+    <form action="{% url 'svod' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="files" multiple class="btn btn-primary">
         <button type="submit" class="btn btn-primary">Загрузить</button>
-
     </form>
-    </div>
+</div>
 
-</body>
-</html>
+<div class="center instructions">
+    <ol>
+        <li>Выберите файлы</li>
+        <li>Нажмите кнопку "Загрузить"</li>
+        <li>Перейдите в загруженные файлы и выберите сформировавшийся файл </li>
+    </ol>
+</div>
+
 {% endblock %}
-
 
 
