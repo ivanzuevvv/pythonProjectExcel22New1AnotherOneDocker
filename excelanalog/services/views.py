@@ -1,14 +1,9 @@
-
-
-
 import os
-
 import openpyxl
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook import Workbook
-
 from .forms import CheckListForm, ReestrForm
 from .models import Columns, CheckList, Reestr
 from openpyxl.styles import Font, PatternFill, Alignment
@@ -17,15 +12,9 @@ import pandas as pd
 from openpyxl.styles import Border, Side
 
 
-# Создание пустого DataFrame для свода
-
-
-
-
 # Create your views here.
 def index(request):
     return render(request, 'base.html')
-
 
 
 def svod(request):
@@ -154,14 +143,26 @@ def svod(request):
             # Сохранение файла Excel
             table_end_row = worksheet1.max_row
 
+
+
             worksheet1.delete_cols(5, 3)  # Удаление столбиков с индексами 5, 6 и 7
             worksheet1.insert_rows(1, 12)  # Опускание таблицы на 12 строк ниже начиная с первой строки
+
+            last_row = worksheet1.max_row
+            sum_formula = f"=SUM(G1:G{last_row})"
+            worksheet1.cell(row=last_row + 1, column=7).value = sum_formula
+
+            last_row1 = worksheet1.max_row
+            sum_formula1 = f"=SUM(H1:H{last_row})"
+            worksheet1.cell(row=last_row1 + 0, column=8).value = sum_formula1
+
             worksheet1.cell(row=1, column=4).value = "Сводный реестр контрольных процедур"
             worksheet1.cell(row=2, column=4).value = " "
             worksheet1.cell(row=3, column=4).value = "_____________________________________"
             worksheet1.cell(row=4, column=4).value = "наименование филиала/отдела)"
             worksheet1.cell(row=6, column=4).value = "осуществляемых в целях налогового мониторинга"
             worksheet1.cell(row=7, column=4).value = "________________________________"
+
 
             worksheet1.cell(row=table_end_row + 14, column=2).value = "________________________________"
             worksheet1.cell(row=table_end_row + 14, column=4).value = "________________________________"
@@ -170,7 +171,6 @@ def svod(request):
             worksheet1.cell(row=table_end_row + 15, column=2).value = "должность"
             worksheet1.cell(row=table_end_row + 15, column=4).value = "подпись"
             worksheet1.cell(row=table_end_row + 15, column=6).value = "ФИО"
-
 
 
             workbook.save("example.xlsx")
@@ -202,18 +202,19 @@ def svod(request):
             # Опускание таблицы на 2 строк ниже начиная с первой строки
             worksheet2.insert_rows(1, 2)
             worksheet2.cell(row=2, column=5).value = "Реестр объектов контроля"
-            ##################################################
+
+
+
+            # Определение последней строки для столбца I
+            last_row = worksheet2.max_row
+            sum_formula = f"=SUM(I1:I{last_row})"
+            worksheet2.cell(row=last_row + 1, column=9).value = sum_formula
 
             last_row1 = worksheet2.max_row
-            sum_formula1 = f"=SUM(H1:H23)"
-            worksheet2.cell(row=last_row1 + 20, column=8).value = sum_formula1
+            sum_formula1 = f"=SUM(H1:H{last_row})"
+            worksheet2.cell(row=last_row1 + 0, column=8).value = sum_formula1
 
 
-            last_row = worksheet2.max_row
-            sum_formula = f"=SUM(I1:I23)"
-            worksheet2.cell(row=last_row, column=9).value = sum_formula
-
-            ###############################################################
             # Автоматическое расширение столбцов для второго листа
             for column_cells in worksheet2.columns:
                 length = max(len(str(cell.value)) for cell in column_cells)
@@ -227,6 +228,20 @@ def svod(request):
 
             # Получение объекта worksheet для третьего листа
             worksheet3 = writer.sheets['Sheet3']
+
+            values3 = ['За Декабрь 2023г', 'За Январь 2023г', 'За Февраль 2023г', 'За Март 2023г', 'За Апрель 2023г', 'За Май 2023г',
+                      'За Июнь 2023г', 'За Июль 2023г', 'За Август 2023г', 'За Сентябрь 2023г',
+                      'За Октябрь 2023г', 'За Ноябрь 2023г',
+                      ]
+
+            # Создаем объект DataValidation
+            data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values3)))
+
+            # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
+            worksheet3.add_data_validation(data_validation)
+            data_validation.add(worksheet3['D5'])
+
+            worksheet3.insert_rows(1, 7)
 
 
 
@@ -244,6 +259,17 @@ def svod(request):
             worksheet3.delete_cols(5)
 
             worksheet3.delete_cols(4)
+
+            worksheet3.cell(row=3, column=4).value = "осуществляемых в целях налогового мониторинга"
+
+            last_row = worksheet3.max_row
+            sum_formula = f"=SUM(D1:D{last_row})"
+            worksheet3.cell(row=last_row + 1, column=4).value = sum_formula
+
+            last_row1 = worksheet3.max_row
+            sum_formula1 = f"=SUM(E1:E{last_row})"
+            worksheet3.cell(row=last_row1 + 0, column=5).value = sum_formula1
+
 
 
 
@@ -270,7 +296,6 @@ def svod(request):
             return response
 
     return render(request, 'svod.html')  # Отображение шаблона "upload.html".
-
 
 
 def base(request):
@@ -304,7 +329,6 @@ def base(request):
     # Получаем все объекты модели Columns
     columns = Columns.objects.all()
     return render(request, 'tables.html', {'columns': columns})
-
 
 
 def checklist_detail(request, pk):
@@ -351,9 +375,6 @@ def checklist_detail(request, pk):
     return response
 
 
-
-
-
 def edit_reestr(request, pk):
     reestr = get_object_or_404(Reestr, pk=pk)
     columns = Reestr.objects.all()  # Получение всех объектов Column
@@ -365,7 +386,6 @@ def edit_reestr(request, pk):
     else:
         form = ReestrForm(instance=reestr)
     return render(request, 'reestr.html', {'reestr': reestr,'form': form, 'columns': columns })
-
 
 
 def indexx(request):
@@ -390,7 +410,6 @@ def indexx(request):
         # Создаем новый Excel-файл и заполняем его данными из таблицы
         workbook = Workbook()
         sheet = workbook.active
-
 
 
 def download_excel(request, pk):
