@@ -444,44 +444,38 @@ def download_excel(request, pk):
     from openpyxl.styles import Alignment
     from openpyxl import Workbook
 
-
     checklist1 = get_object_or_404(CheckList, pk=pk)
     checklist2 = get_object_or_404(Reestr, pk=pk)
 
-
     workbook = Workbook()
-
     # Запись данных из базы данных в таблицу
     worksheet1 = workbook.active
-
     # Задаем список значений для выпадающего списка
-    worksheet1.merge_cells('H3:I3')
-
+    worksheet1.merge_cells('L9')
     # Задаем список значений для выпадающего списка
-    values = ['АУП', 'Югорское УМТС и К', 'УОВОФ', 'Надымское УАВР', 'Югорское УАВР', 'Белоярское УАВР',
-                      'Надымское УТТиСТ', 'Югорское УТТиСТ', 'Белоярское УТТиСТ', 'ИТЦ',
-                      'Учебно-производственный центр', 'УЭЗ и С', 'Управление связи',
-              'Бобровское ЛПУ', 'Верхнеказымское ЛПУ', 'Ивдельское ЛПУ', 'Казымское ЛПУ',
-                      'Карпинское ЛПУ', 'Комсомольское ЛПУ', 'Краснотурьинское ЛПУ',
-                      'Лонг-Юганское ЛПУ', 'Надымское ЛПУ', 'Нижнетуринское ЛПУ',
-              'Ново-Уренгойское ЛПУ', 'Ныдинское ЛПУ', 'Октябрьское ЛПУ', 'Пангодинское ЛПУ'
-                      'Пелымское ЛПУ', 'Перегребненское ЛПУ', 'Правохеттинское ЛПУ', 'Приозерное ЛПУ',
+    values = [ 'АУП', 'Югорское УМТС и К', 'УОВОФ', 'Надымское УАВР', 'Югорское УАВР', 'Белоярское УАВР',
+              'Надымское УТТиСТ', 'Югорское УТТиСТ', 'Белоярское УТТиСТ', 'ИТЦ',
+              'Учебно-производственный центр', 'УЭЗ и С', 'Управление связи', 'Бобровское ЛПУ',
+              'Верхнеказымское ЛПУ', 'Ивдельское ЛПУ', 'Казымское ЛПУ',
+              'Карпинское ЛПУ', 'Комсомольское ЛПУ', 'Краснотурьинское ЛПУ',
+              'Лонг-Юганское ЛПУ', 'Надымское ЛПУ', 'Нижнетуринское ЛПУ', 'Ново-Уренгойское ЛПУ',
+              'Ныдинское ЛПУ', 'Октябрьское ЛПУ', 'Пангодинское ЛПУ'
+                'Пелымское ЛПУ', 'Перегребненское ЛПУ', 'Правохеттинское ЛПУ',
+              'Приозерное ЛПУ',
               'Пунгинское ЛПУ', 'Сорумское ЛПУ', 'Сосновское ЛПУ',
-                      'Таежное ЛПУ', 'Уральское ЛПУ', 'Ягельное ЛПУ', 'Ямбургское ЛПУ',
-              'Санаторий-профилакторий', 'КСК Норд',
-               ]
+              'Таежное ЛПУ', 'Уральское ЛПУ', 'Ягельное ЛПУ', 'Ямбургское ЛПУ', 'Санаторий-профилакторий',
+              'КСК Норд',
+              ]
 
     # Создаем объект DataValidation
     data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values)))
 
     # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
     worksheet1.add_data_validation(data_validation)
-    data_validation.add(worksheet1['H3'])
-    data_validation.add(worksheet1['I3'])
-
+    data_validation.add(worksheet1['L9'])
+    #data_validation.add(worksheet1['I3'])
 
     workbook.save('example.xlsx')
-
 
     worksheet1.cell(row=9, column=1).value = checklist1.number
     worksheet1.merge_cells('A8')
@@ -543,6 +537,11 @@ def download_excel(request, pk):
     worksheet1['K8'] = 'Количество выявленных ошибок/ нарушений'
     worksheet1['K8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
+    worksheet1.cell(row=9, column=12).value = checklist1.filial
+    worksheet1.merge_cells('L8')
+    worksheet1['L8'] = 'Филиал'
+    worksheet1['L8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+
     # Создание стиля границы
     border_style = Border(left=Side(border_style="thin", color="000000"),
                           right=Side(border_style="thin", color="000000"),
@@ -566,14 +565,14 @@ def download_excel(request, pk):
 
 
     for row in worksheet1.rows:
-        max_length = 15
+        max_length = 1500
         for cell in row:
             try:
                 if len(str(cell.value)) > max_length:
                     max_length = len(cell.value)
             except:
                 pass
-        adjusted_height = 400
+        adjusted_height = 90
         alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
 
         for cell in worksheet1[row[8].column]:
@@ -585,7 +584,7 @@ def download_excel(request, pk):
 
 
     # Применение стиля границы к ячейкам
-    for i in range(1, 8):
+    for i in range(1, 9):
         for column in worksheet1.iter_cols(min_row=8, max_row=9, min_col=i, max_col=i + 4):
             for cell in column:
                 cell.border = border_style
@@ -599,8 +598,8 @@ def download_excel(request, pk):
     worksheet1.cell(row=15, column=6).value = "                (ФИО)"
     worksheet1.cell(row=14, column=8).value = "______________________"
     worksheet1.cell(row=15, column=8).value = "                (дата)"
-    worksheet1.cell(row=3, column=8).value = "_____________________________________"
-    worksheet1.cell(row=4, column=8).value = "                (наименование филиала)"
+    #worksheet1.cell(row=3, column=8).value = "_____________________________________"
+    worksheet1.cell(row=4, column=8).value = " (наименование филиала)"
     worksheet1.cell(row=2, column=11).value = "_____________________"
     worksheet1.cell(row=3, column=11).value = "   Код отдела/службы"
     worksheet1.cell(row=7, column=5).value = "          Чек-лист за"
@@ -609,6 +608,7 @@ def download_excel(request, pk):
     worksheet1.cell(row=7, column=6).font = worksheet1.cell(row=7, column=6).font.copy(bold=True)
     worksheet1.cell(row=7, column=7).value = "            2023г."
     worksheet1.cell(row=7, column=7).font = worksheet1.cell(row=7, column=7).font.copy(bold=True)
+    worksheet1.cell(row=3, column=8).value = f"=L9"
 
 
     worksheet2 = workbook.create_sheet(title='Sheet2')
@@ -620,6 +620,7 @@ def download_excel(request, pk):
                'Количество документов/операций',
                'Количество ошибок/нарушений',
                'Примечание',
+                'Филиал'
                ]
     for col_num, header in enumerate(headers2, 1):
         cell = worksheet2.cell(row=3, column=col_num)
@@ -793,8 +794,8 @@ def download_excel1(request, pk):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=checklist.xlsx'
     workbook.save(response)
-
     return response
+
 
 
 
@@ -803,18 +804,20 @@ def svod2(request):
     if request.method == 'POST':
         files = request.FILES.getlist('files')  # Получение списка загруженных файлов
 
+
         # Создание пустого сводного DataFrame для первого листа
         summary_df1 = pd.DataFrame(
             columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП',
                      'Переодичность проведения', 'Способ подсчета результаты проведения КП',
                      'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
-                     'Количество выполненых КП', 'Количество выявленных ошибок'])
+                     'Количество выполненых КП', 'Количество выявленных ошибок', 'Филиал'])
 
         # Создание пустого сводного DataFrame для второго листа
-        summary_df2 = pd.DataFrame(columns=['№ п/п', 'Код КП(промежуточный)', 'Исполнитель ИП', 'номер чек листа',
-                                            'Объект контроля (договор, акт, счет-фактура, КС-2 и др.)',
-                                            'Дата документа', 'Номер документа', 'Количество документов/операций',
-                                            'Количество ошибок/нарушений', 'Примечание'])
+        summary_df2 = pd.DataFrame(columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП',
+                     'Переодичность проведения', 'Способ подсчета результаты проведения КП',
+                     'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                     'Количество выполненых КП', 'Количество выявленных ошибок', 'Филиал', ])
+
 
         summary_df3 = pd.DataFrame(
             columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование контрольной процедуры', 'Описание КП',
@@ -825,11 +828,11 @@ def svod2(request):
         # Обработка каждого загруженного файла
         for file in files:
             # Чтение первого листа файла и взятие только значений
-            df1 = pd.read_excel(file, sheet_name='Sheet', usecols="A:K", header=None, skiprows=8, nrows=1)
+            df1 = pd.read_excel(file, sheet_name='Sheet', usecols="A:L", header=None, skiprows=8, nrows=1)
             df1 = df1.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП',
                                 'Переодичность проведения', 'Способ подсчета результаты проведения КП',
                                 'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
-                                'Количество выполненых КП', 'Количество выявленных ошибок', ], axis=1)
+                                'Количество выполненых КП', 'Количество выявленных ошибок', 'Филиал' ], axis=1)
 
             # Получение имени файла без расширения
             file_name = os.path.splitext(file.name)[0]
@@ -844,19 +847,20 @@ def svod2(request):
             summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
 
             # Чтение второго листа файла и взятие только значений
-            df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=3, nrows=5)
-            df2 = df2.set_axis(['№ п/п', 'Код КП(промежуточный)', 'Исполнитель ИП', 'номер чек листа',
-                                            'Объект контроля (договор, акт, счет-фактура, КС-2 и др.)',
-                                            'Дата документа', 'Номер документа', 'Количество документов/операций',
-                                            'Количество ошибок/нарушений', 'Примечание'], axis=1)
+            df2 = pd.read_excel(file, sheet_name='Sheet', usecols="A:L", header=None, skiprows=8, nrows=1)
+            df2 = df2.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП',
+                                'Переодичность проведения', 'Способ подсчета результаты проведения КП',
+                                'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                                'Количество выполненых КП', 'Количество выявленных ошибок', 'Филиал'], axis=1)
 
-            ########################################
-            sum_docs = df2['Количество документов/операций'].sum()
-            sum_errors = df2['Количество ошибок/нарушений'].sum()
+            # Получение имени файла без расширения
+            file_name = os.path.splitext(file.name)[0]
 
-            # Создаем новый DataFrame с суммами
+            # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
+            df2['Документ'] = file_name
 
-            ##########################################
+            df2.drop(['Способ подсчета результаты проведения КП', 'Описание КП', 'Переодичность проведения'], axis=1,
+                     inplace=True)
             df2 = df2.reset_index(drop=True)
             df2 = df2.rename_axis([None], axis=1)
             summary_df2 = pd.concat([summary_df2, df2], ignore_index=True)
@@ -1004,37 +1008,50 @@ def svod2(request):
                 # Установка выравнивания для каждой ячейки в строке
             # Получение объекта worksheet для второго листа
             worksheet2 = writer.sheets['Sheet2']
+
+            worksheet2.delete_cols(5, 3)
+            worksheet2.delete_cols(3)
+            worksheet2.delete_cols(4)
+            worksheet2.delete_cols(4)
+            worksheet2.delete_cols(3)
+            worksheet2.delete_cols(6)
+
             # Опускание таблицы на 2 строк ниже начиная с первой строки
             worksheet2.insert_rows(1, 2)
-            worksheet2.cell(row=2, column=5).value = "Реестр объектов контроля"
+            #worksheet2.cell(row=2, column=5).value = "Реестр объектов контроля"
 
 
 
             # Определение последней строки для столбца I
-            last_row = worksheet2.max_row
-            sum_formula = f"=SUM(I1:I{last_row})"
-            worksheet2.cell(row=last_row + 1, column=9).value = sum_formula
+            #last_row = worksheet2.max_row
+            #sum_formula = f"=SUM(I1:I{last_row})"
+            #worksheet2.cell(row=last_row + 1, column=9).value = sum_formula
 
-            last_row1 = worksheet2.max_row
-            sum_formula1 = f"=SUM(H1:H{last_row})"
-            worksheet2.cell(row=last_row1 + 0, column=8).value = sum_formula1
+            #last_row1 = worksheet2.max_row
+            #sum_formula1 = f"=SUM(H1:H{last_row})"
+            #worksheet2.cell(row=last_row1 + 0, column=8).value = sum_formula1
 
-            last_row2 = worksheet2.max_row
-            sum_formula1 = "Итого:"
-            cell = worksheet2.cell(row=last_row2 + 0, column=7)
-            cell.value = sum_formula1
-            cell.alignment = Alignment(horizontal='right')
+            #last_row2 = worksheet2.max_row
+            #sum_formula1 = "Итого:"
+            #cell = worksheet2.cell(row=last_row2 + 0, column=7)
+            #cell.value = sum_formula1
+            #cell.alignment = Alignment(horizontal='right')
 
             # Автоматическое расширение столбцов для второго листа
-            for column_cells in worksheet2.columns:
-                length = max(len(str(cell.value)) for cell in column_cells)
-                worksheet2.column_dimensions[column_cells[0].column_letter].width = length
+            for row in range(worksheet2.max_row, 0, -1):
+                max_length = 0
+                for cell in worksheet2[row]:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                worksheet2.row_dimensions[row].height = max_length
 
+                for column_cells in worksheet2.columns:
+                    length = max(len(str(cell.value)) for cell in column_cells)
+                    worksheet2.column_dimensions[column_cells[0].column_letter].width = length
 
-
+                # Установка выравнивания для каждой ячейки в строке
                 for cell in worksheet2[row]:
                     cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
-
 
             # Получение объекта worksheet для третьего листа
             worksheet3 = writer.sheets['Sheet3']
@@ -1097,8 +1114,6 @@ def svod2(request):
 
                 for cell in worksheet3[row]:
                     cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
-
-
 
 
 
