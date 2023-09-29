@@ -192,6 +192,7 @@ def svod(request):
             worksheet1.cell(row=4, column=4).value = "наименование филиала/отдела)"
             worksheet1.cell(row=6, column=4).value = "осуществляемых в целях налогового мониторинга"
             worksheet1.cell(row=7, column=4).value = "________________________________"
+            worksheet1.cell(row=3, column=4).value = f"="
 
 
             #worksheet1.cell(row=table_end_row + 15, column=2).value = "________________________________"
@@ -924,7 +925,7 @@ def svod2(request):
             #worksheet1.delete_cols(4)
 
             # Удаление столбиков с индексами 5, 6 и 7
-            worksheet1.insert_rows(1, 12)
+
 
             for row in range(worksheet1.max_row, 0, -1):
                 max_length = 20
