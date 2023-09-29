@@ -69,7 +69,6 @@ def svod(request):
 
 
 
-
             # Чтение второго листа файла и взятие только значений
             df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=3, nrows=5)
             df2 = df2.set_axis(['№ п/п', 'Код КП(промежуточный)', 'Исполнитель ИП', 'номер чек листа',
@@ -87,7 +86,6 @@ def svod(request):
             df2 = df2.reset_index(drop=True)
             df2 = df2.rename_axis([None], axis=1)
             summary_df2 = pd.concat([summary_df2, df2], ignore_index=True)
-
 
 
 
@@ -126,9 +124,7 @@ def svod(request):
             num_rows = summary_df1.shape[0]
 
             # Установка границ объединения ячеек
-            worksheet1 = writer.sheets['Sheet']
-            merge_range = f"J14:J{num_rows + 13}"
-            worksheet1.merge_cells(merge_range)
+
 
 
 
@@ -198,11 +194,11 @@ def svod(request):
             worksheet1.cell(row=7, column=4).value = "________________________________"
 
 
-            worksheet1.cell(row=table_end_row + 15, column=2).value = "________________________________"
+            #worksheet1.cell(row=table_end_row + 15, column=2).value = "________________________________"
             worksheet1.cell(row=table_end_row + 15, column=4).value = "________________________________"
             worksheet1.cell(row=table_end_row + 15, column=6).value = "________________________________"
 
-            worksheet1.cell(row=table_end_row + 16, column=2).value = "должность"
+            #worksheet1.cell(row=table_end_row + 16, column=2).value = "должность"
             worksheet1.cell(row=table_end_row + 16, column=4).value = "подпись"
             cell = worksheet1.cell(row=table_end_row + 16, column=6)
             cell.value = "ФИО"
@@ -212,7 +208,7 @@ def svod(request):
             workbook.save("example.xlsx")
 
 
-            # Автоматическое расширение столбцов для первого листа
+            # Автоматическое расширение столбцов для первог о листа
             for row in range(worksheet1.max_row, 0, -1):
                 max_length = 0
                 for cell in worksheet1[row]:
@@ -283,8 +279,6 @@ def svod(request):
             data_validation.add(worksheet3['D5'])
 
             worksheet3.insert_rows(1, 7)
-
-
 
             # Удаление столбиков с индексами 5, 6 и 7
 
@@ -873,7 +867,11 @@ def svod2(request):
 
             worksheet1 = workbook.active
 
-            worksheet1.merge_cells('E14:E30')
+            #worksheet1.merge_cells('E14:E30')
+            num_rows = summary_df1.shape[0]
+
+
+
 
             values = ['АУП', 'Югорское УМТС и К', 'УОВОФ', 'Надымское УАВР', 'Югорское УАВР', 'Белоярское УАВР',
                       'Надымское УТТиСТ', 'Югорское УТТиСТ', 'Белоярское УТТиСТ', 'ИТЦ',
@@ -921,23 +919,15 @@ def svod2(request):
             worksheet1.delete_cols(5)
 
 
+
+
             #worksheet1.delete_cols(4)
 
             # Удаление столбиков с индексами 5, 6 и 7
-            worksheet1.insert_rows(1, 12)  # Опускание таблицы на 12 строк ниже начиная с первой строки
+            worksheet1.insert_rows(1, 12)
 
-
-
-
-
-
-
-            workbook.save("example2.xlsx")
-
-
-            # Автоматическое расширение столбцов для первого листа
             for row in range(worksheet1.max_row, 0, -1):
-                max_length = 0
+                max_length = 20
                 for cell in worksheet1[row]:
                     if len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
@@ -949,7 +939,20 @@ def svod2(request):
 
                 # Установка выравнивания для каждой ячейки в строке
                 for cell in worksheet1[row]:
-                    cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
+                    cell.alignment = Alignment( vertical='center', wrap_text=True)
+            # Опускание таблицы на 12 строк ниже начиная с первой строки
+
+
+
+
+
+
+
+            workbook.save("example2.xlsx")
+
+
+            # Автоматическое расширение столбцов для первого листа
+
 
 
 
