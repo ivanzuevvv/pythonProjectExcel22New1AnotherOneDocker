@@ -63,10 +63,9 @@ def svod(request):
             df1 = df1.rename_axis([None], axis=1)
             summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
 
-            filial_value = 'Значение филиала'  # Значение филиала, которое вы хотите добавить
-
-            summary_df1['филиал'] = filial_value
-
+            summary_df1['филиал'] = 'Your Filial Value'
+            summary_df1.fillna(method='ffill', inplace=True)
+            summary_df1['филиал'] = summary_df1['филиал'].str.join('')
 
 
             # Чтение второго листа файла и взятие только значений
@@ -196,14 +195,14 @@ def svod(request):
 
 
             #worksheet1.cell(row=table_end_row + 15, column=2).value = "________________________________"
-            worksheet1.cell(row=table_end_row + 15, column=4).value = "________________________________"
-            worksheet1.cell(row=table_end_row + 15, column=6).value = "________________________________"
+            #worksheet1.cell(row=table_end_row + 15, column=4).value = "________________________________"
+            #worksheet1.cell(row=table_end_row + 15, column=6).value = "________________________________"
 
             #worksheet1.cell(row=table_end_row + 16, column=2).value = "должность"
-            worksheet1.cell(row=table_end_row + 16, column=4).value = "подпись"
-            cell = worksheet1.cell(row=table_end_row + 16, column=6)
-            cell.value = "ФИО"
-            cell.alignment = Alignment(horizontal='left')
+            #worksheet1.cell(row=table_end_row + 16, column=4).value = "подпись"
+            #cell = worksheet1.cell(row=table_end_row + 16, column=6)
+            #cell.value = "ФИО"
+            #cell.alignment = Alignment(horizontal='left')
 
 
             workbook.save("example.xlsx")
@@ -820,6 +819,13 @@ def svod2(request):
                      'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
                      'Количество выполненых КП', 'Количество выявленных ошибок','Документ', 'Филиал'])
 
+        summary_df2 = pd.DataFrame(
+            columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
+                     'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                     'Количество выполненых КП', 'Количество выявленных ошибок', 'Документ', 'Филиал'])
+
+
+
 
 
         # Обработка каждого загруженного файла
@@ -843,6 +849,26 @@ def svod2(request):
             summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
 
             # Чтение второго листа файла и взятие только значений
+            df2 = pd.read_excel(file, sheet_name='Sheet', usecols="A:J", header=None, skiprows=13, nrows=100)
+            df2 = df2.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
+                                'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                                'Количество выполненых КП', 'Количество выявленных ошибок', 'Документ', 'Филиал'],
+                               axis=1)
+
+            # Получение имени файла без расширения
+            file_name = os.path.splitext(file.name)[0]
+
+            # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
+            df2['Документ'] = file_name
+
+            df2.drop(['Филиал'], axis=1,
+                     inplace=True)
+            df2 = df2.reset_index(drop=True)
+            df2 = df2.rename_axis([None], axis=1)
+
+            df2 = df2.drop(df2.index[-1])
+            summary_df2 = summary_df2.apply(lambda x: x[:-3])
+            summary_df2 = pd.concat([summary_df2, df2], ignore_index=True)
 
 
 
@@ -853,6 +879,7 @@ def svod2(request):
         # Создание нового файла Excel с двумя листами
         with pd.ExcelWriter('summary.xlsx', engine='openpyxl') as writer:
             summary_df1.to_excel(writer, sheet_name='Sheet', index=False)
+            summary_df2.to_excel(writer, sheet_name='Sheet2', index=False)
 
 
             # Получение объекта workbook
@@ -860,7 +887,7 @@ def svod2(request):
 
             # Получение объекта worksheet для первого листа
             worksheet1 = writer.sheets['Sheet']
-
+            worksheet2 = writer.sheets['Sheet2']
 
 
 
@@ -870,7 +897,6 @@ def svod2(request):
 
             #worksheet1.merge_cells('E14:E30')
             num_rows = summary_df1.shape[0]
-
 
 
 
@@ -919,6 +945,13 @@ def svod2(request):
             worksheet1.delete_cols(3)
             worksheet1.delete_cols(5)
 
+            worksheet2.delete_cols(3)
+            worksheet2.delete_cols(4)
+            worksheet2.delete_cols(4)
+            worksheet2.delete_cols(7)
+            worksheet2.delete_cols(6)
+
+
 
 
 
@@ -943,20 +976,23 @@ def svod2(request):
                     cell.alignment = Alignment( vertical='center', wrap_text=True)
             # Опускание таблицы на 12 строк ниже начиная с первой строки
 
+                    # Установка выравнивания для каждой ячейки в строке
+                    # Получение объекта worksheet для второго листа
+                    worksheet2 = writer.sheets['Sheet2']
+                    # Опускание таблицы на 2 строк ниже начиная с первой строки
 
+                    # Автоматическое расширение столбцов для второго листа
+                    for column_cells in worksheet2.columns:
+                        length = max(len(str(cell.value)) for cell in column_cells)
+                        worksheet2.column_dimensions[column_cells[0].column_letter].width = length
 
-
-
-
+                        for cell in worksheet2[row]:
+                            cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
 
             workbook.save("example2.xlsx")
 
 
             # Автоматическое расширение столбцов для первого листа
-
-
-
-
 
 
         file_path = 'summary.xlsx'  # Путь к файлу
