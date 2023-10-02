@@ -824,6 +824,11 @@ def svod2(request):
                      'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
                      'Количество выполненых КП', 'Количество выявленных ошибок', 'Документ', 'Филиал'])
 
+        summary_df3 = pd.DataFrame(
+            columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
+                     'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                     'Количество выполненых КП', 'Количество выявленных ошибок', 'Документ', 'Филиал'])
+
 
 
 
@@ -848,6 +853,7 @@ def svod2(request):
             df1 = df1.rename_axis([None], axis=1)
             summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
 
+
             # Чтение второго листа файла и взятие только значений
             df2 = pd.read_excel(file, sheet_name='Sheet', usecols="A:J", header=None, skiprows=13, nrows=100)
             df2 = df2.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
@@ -861,14 +867,54 @@ def svod2(request):
             # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
             df2['Документ'] = file_name
 
+            # Группировка данных по полю 'Код КП(общий)' и суммирование полей 'Количество выполненых КП' и 'Количество выявленных ошибок'
+
+
             df2.drop(['Филиал'], axis=1,
                      inplace=True)
             df2 = df2.reset_index(drop=True)
             df2 = df2.rename_axis([None], axis=1)
 
-            df2 = df2.drop(df2.index[-1])
-            summary_df2 = summary_df2.apply(lambda x: x[:-3])
+            # Группировка данных по полю 'Код КП(общий)' и суммирование полей 'Количество выполненых КП' и 'Количество выявленных ошибок'
+            df2 = df2.groupby(['номер п/п', 'Наименование ИП', 'Код КП(общий)', ]).agg(
+                {'Количество выполненых КП': 'sum', 'Количество выявленных ошибок': 'sum'}).reset_index()
+
+
+
             summary_df2 = pd.concat([summary_df2, df2], ignore_index=True)
+
+
+
+            # Чтение третьего листа файла и взятие только значений
+            df3 = pd.read_excel(file, sheet_name='Sheet', usecols="A:J", header=None, skiprows=13, nrows=100)
+            df3 = df3.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
+                                'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                                'Количество выполненых КП', 'Количество выявленных ошибок', 'Документ', 'Филиал'],
+                               axis=1)
+
+            # Получение имени файла без расширения
+            file_name = os.path.splitext(file.name)[0]
+
+            # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
+            df3['Документ'] = file_name
+
+            # Группировка данных по полю 'Код КП(общий)' и суммирование полей 'Количество выполненых КП' и 'Количество выявленных ошибок'
+
+            df3.drop(['Филиал'], axis=1,
+                     inplace=True)
+            df3 = df3.reset_index(drop=True)
+            df3 = df3.rename_axis([None], axis=1)
+
+            # Группировка данных по полю 'Код КП(общий)' и суммирование полей 'Количество выполненых КП' и 'Количество выявленных ошибок'
+
+
+
+            summary_df3 = pd.concat([summary_df3, df3], ignore_index=True)
+
+            # Группировка данных по полю 'Код КП(общий)' и суммирование полей 'Количество выполненых КП' и 'Количество выявленных ошибок'
+
+
+
 
 
 
@@ -880,6 +926,7 @@ def svod2(request):
         with pd.ExcelWriter('summary.xlsx', engine='openpyxl') as writer:
             summary_df1.to_excel(writer, sheet_name='Sheet', index=False)
             summary_df2.to_excel(writer, sheet_name='Sheet2', index=False)
+            summary_df2.to_excel(writer, sheet_name='Sheet3', index=False)
 
 
             # Получение объекта workbook
@@ -888,6 +935,7 @@ def svod2(request):
             # Получение объекта worksheet для первого листа
             worksheet1 = writer.sheets['Sheet']
             worksheet2 = writer.sheets['Sheet2']
+            worksheet3 = writer.sheets['Sheet3']
 
 
 
@@ -951,13 +999,24 @@ def svod2(request):
             worksheet2.delete_cols(7)
             worksheet2.delete_cols(6)
 
-
-
-
+            worksheet3.delete_cols(3)
+            worksheet3.delete_cols(4)
+            worksheet3.delete_cols(4)
+            worksheet3.delete_cols(7)
+            worksheet3.delete_cols(6)
 
             #worksheet1.delete_cols(4)
 
             # Удаление столбиков с индексами 5, 6 и 7
+
+            worksheet3 = writer.sheets['Sheet3']
+
+            # Опускание таблицы на 2 строк ниже начиная с первой строки
+
+            # Автоматическое расширение столбцов для второго листа
+
+            # Опускание таблицы на 2 строк ниже начиная с первой строки
+
 
 
             for row in range(worksheet1.max_row, 0, -1):
@@ -988,6 +1047,14 @@ def svod2(request):
 
                         for cell in worksheet2[row]:
                             cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
+
+                for column_cells in worksheet3.columns:
+                    length = max(len(str(cell.value)) for cell in column_cells)
+                    worksheet3.column_dimensions[column_cells[0].column_letter].width = length
+
+                    for cell in worksheet2[row]:
+                        cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
+
 
             workbook.save("example2.xlsx")
 
