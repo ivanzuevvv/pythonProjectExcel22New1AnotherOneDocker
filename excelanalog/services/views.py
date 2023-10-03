@@ -854,6 +854,7 @@ def svod2(request):
             summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
 
 
+
             # Чтение второго листа файла и взятие только значений
             df2 = pd.read_excel(file, sheet_name='Sheet', usecols="A:J", header=None, skiprows=13, nrows=100)
             df2 = df2.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
@@ -861,27 +862,16 @@ def svod2(request):
                                 'Количество выполненых КП', 'Количество выявленных ошибок', 'Документ', 'Филиал'],
                                axis=1)
 
-            # Получение имени файла без расширения
-            file_name = os.path.splitext(file.name)[0]
 
-            # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
-            df2['Документ'] = file_name
-
-            # Группировка данных по полю 'Код КП(общий)' и суммирование полей 'Количество выполненых КП' и 'Количество выявленных ошибок'
-
-
-            df2.drop(['Филиал'], axis=1,
-                     inplace=True)
-            df2 = df2.reset_index(drop=True)
-            df2 = df2.rename_axis([None], axis=1)
-
-            # Группировка данных по полю 'Код КП(общий)' и суммирование полей 'Количество выполненых КП' и 'Количество выявленных ошибок'
-            df2 = df2.groupby(['номер п/п', 'Наименование ИП', 'Код КП(общий)', ]).agg(
+            summary_df2 = summary_df1.groupby(['номер п/п', 'Наименование ИП', 'Код КП(общий)',]).agg(
                 {'Количество выполненых КП': 'sum', 'Количество выявленных ошибок': 'sum'}).reset_index()
 
 
 
-            summary_df2 = pd.concat([summary_df2, df2], ignore_index=True)
+
+
+            summary_df2 = pd.concat([summary_df2, ], ignore_index=True)
+
 
 
 
@@ -906,19 +896,17 @@ def svod2(request):
             df3 = df3.rename_axis([None], axis=1)
 
             # Группировка данных по полю 'Код КП(общий)' и суммирование полей 'Количество выполненых КП' и 'Количество выявленных ошибок'
+            df3 = df3.drop_duplicates()
+
+            # Группировка данных и суммирование полей
+            df3 = df3.groupby(['номер п/п', 'Наименование ИП', 'Код КП(общий)']).agg(
+                {'Количество выполненых КП': 'sum', 'Количество выявленных ошибок': 'sum'}).reset_index()
 
 
 
             summary_df3 = pd.concat([summary_df3, df3], ignore_index=True)
 
             # Группировка данных по полю 'Код КП(общий)' и суммирование полей 'Количество выполненых КП' и 'Количество выявленных ошибок'
-
-
-
-
-
-
-
 
 
 
@@ -993,11 +981,11 @@ def svod2(request):
             worksheet1.delete_cols(3)
             worksheet1.delete_cols(5)
 
-            worksheet2.delete_cols(3)
-            worksheet2.delete_cols(4)
-            worksheet2.delete_cols(4)
-            worksheet2.delete_cols(7)
-            worksheet2.delete_cols(6)
+            #worksheet2.delete_cols(3)
+            #worksheet2.delete_cols(4)
+            #worksheet2.delete_cols(4)
+            #worksheet2.delete_cols(7)
+            #worksheet2.delete_cols(6)
 
             worksheet3.delete_cols(3)
             worksheet3.delete_cols(4)
@@ -1037,7 +1025,7 @@ def svod2(request):
 
                     # Установка выравнивания для каждой ячейки в строке
                     # Получение объекта worksheet для второго листа
-                    worksheet2 = writer.sheets['Sheet2']
+
                     # Опускание таблицы на 2 строк ниже начиная с первой строки
 
                     # Автоматическое расширение столбцов для второго листа
