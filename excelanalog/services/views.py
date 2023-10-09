@@ -10,11 +10,55 @@ from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.worksheet.datavalidation import DataValidation
 import pandas as pd
 from openpyxl.styles import Border, Side
-
+from django.http import HttpResponse
+from django.template.defaultfilters import slugify
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from openpyxl.styles import PatternFill
 
 # Create your views here.
 def index(request):
     return render(request, 'base.html')
+
+
+def upload_file(request):
+    if request.method == 'POST':
+        file = request.FILES['file']
+
+        # Проверка заполнения всех строк на одном уровне
+        workbook = openpyxl.load_workbook(file)
+        worksheet = workbook['Sheet2']  # Имя вашего второго листа
+
+        for row_num in range(3, 21):
+            if worksheet.cell(row=row_num, column=2).value:
+                for col_num in range(1, worksheet.max_column + 1):
+                    if not worksheet.cell(row=row_num, column=col_num).value:
+                        return HttpResponse(
+                            '<div style="text-align: center; font-weight: bold; font-size: 24px; color: black; margin-top: 100px; font-family: Arial;">Пожалуйста, заполните все строки на одном уровне</div>')
+
+                # Если все поля заполнены, продолжайте выполнение кода ниже
+
+                # Добавляем надпись "Проверено" в ячейку B1
+                worksheet['B1'] = 'Проверено'
+
+                green_fill = PatternFill(start_color='00FF00', end_color='00FF00', fill_type='solid')
+                worksheet['B1'].fill = green_fill
+
+        # Создаем временный файл для сохранения изменений
+        temp_file_name = f"{slugify(file.name)}.xlsx"
+        temp_file_path = default_storage.save(temp_file_name, ContentFile(''))
+
+        # Сохраняем изменения в временном файле
+        workbook.save(temp_file_path)
+
+        # Загружаем временный файл пользователю
+        with default_storage.open(temp_file_path, 'rb') as temp_file:
+            response = HttpResponse(temp_file, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="{file.name}"'
+            return response
+
+    return render(request, 'upload.html')
+
 
 
 def svod(request):
@@ -186,12 +230,17 @@ def svod(request):
 
 
             worksheet1.cell(row=1, column=4).value = "Сводный реестр контрольных процедур"
+            worksheet1.cell(row=1, column=4).font = Font(bold=True)
             worksheet1.cell(row=2, column=4).value = " "
             worksheet1.cell(row=3, column=4).value = "_____________________________________"
+            worksheet1.cell(row=3, column=4).value = "Выберите филиал"
+            worksheet1.cell(row=3, column=4).font = Font(bold=True)
+
             worksheet1.cell(row=4, column=4).value = "наименование филиала/отдела)"
             worksheet1.cell(row=6, column=4).value = "осуществляемых в целях налогового мониторинга"
+            worksheet1.cell(row=6, column=4).font = Font(bold=True)
             worksheet1.cell(row=7, column=4).value = "________________________________"
-            worksheet1.cell(row=3, column=4).value = f"="
+
 
 
             #worksheet1.cell(row=table_end_row + 15, column=2).value = "________________________________"
@@ -233,9 +282,8 @@ def svod(request):
             worksheet2 = writer.sheets['Sheet2']
             # Опускание таблицы на 2 строк ниже начиная с первой строки
             worksheet2.insert_rows(1, 2)
-            worksheet2.cell(row=2, column=5).value = "Реестр объектов контроля"
-
-
+            worksheet2.cell(row=2, column=5).value = "                        Реестр обьектов контроля"
+            worksheet2.cell(row=2, column=5).font = Font(bold=True)
 
             # Определение последней строки для столбца I
             last_row = worksheet2.max_row
@@ -295,7 +343,8 @@ def svod(request):
 
             worksheet3.delete_cols(4)
 
-            worksheet3.cell(row=3, column=4).value = "осуществляемых в целях налогового мониторинга"
+            worksheet3.cell(row=3, column=4).value = "Осуществляемых в целях налогового мониторинга"
+            worksheet3.cell(row=3, column=4).font = Font(bold=True)
 
             last_row = worksheet3.max_row
             sum_formula = f"=SUM(D1:D{last_row})"
@@ -311,15 +360,29 @@ def svod(request):
             cell.value = sum_formula1
             cell.alignment = Alignment(horizontal='right')
 
+            last_row2 = worksheet3.max_row
+            sum_formula1 = "."
+            cell = worksheet3.cell(row=last_row2 + 0, column=6)
+            cell.value = sum_formula1
+            cell.alignment = Alignment(horizontal='right')
+
             # После удаления столбка 4, столбок 6 станет столбком 7
 
 
 
             # Автоматическое расширение столбцов для второго листа
-            for column_cells in worksheet3.columns:
-                length = max(len(str(cell.value)) for cell in column_cells)
-                worksheet3.column_dimensions[column_cells[0].column_letter].width = length
+            for row in range(worksheet3.max_row, 0, -1):
+                max_length = 0
+                for cell in worksheet3[row]:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                worksheet3.row_dimensions[row].height = max_length
 
+                for column_cells in worksheet3.columns:
+                    length = max(len(str(cell.value)) for cell in column_cells)
+                    worksheet3.column_dimensions[column_cells[0].column_letter].width = length
+
+                # Установка выравнивания для каждой ячейки в строке
                 for cell in worksheet3[row]:
                     cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
 
@@ -458,23 +521,30 @@ def download_excel(request, pk):
     from django.http import HttpResponse
     from openpyxl.styles import Alignment
     from openpyxl import Workbook
+    from openpyxl.comments import Comment
+
 
     checklist1 = get_object_or_404(CheckList, pk=pk)
     checklist2 = get_object_or_404(Reestr, pk=pk)
 
+
     workbook = Workbook()
     # Запись данных из базы данных в таблицу
     worksheet1 = workbook.active
-    # Задаем список значений для выпадающего списка
+
+
 
     # Задаем список значений для выпадающего списка
-    values = [ 'АУП', 'Югорское УМТС и К', 'УОВОФ', 'Надымское УАВР', 'Югорское УАВР', 'Белоярское УАВР',
-              'Надымское УТТиСТ', 'Югорское УТТиСТ', 'Белоярское УТТиСТ', 'ИТЦ',
-              'Учебно-производственный центр', 'УЭЗ и С', 'Управление связи', 'Бобровское ЛПУ',
-              'Верхнеказымское ЛПУ', 'Ивдельское ЛПУ', 'Казымское ЛПУ',
-              'Карпинское ЛПУ', 'Комсомольское ЛПУ', 'Краснотурьинское ЛПУ',
-
-
+    values = ['АУП', 'Югорское УМТС и К', 'УОВОФ', 'Надымское УАВР', 'Югорское УАВР', 'Белоярское УАВР',
+                      'Надымское УТТиСТ', 'Югорское УТТиСТ', 'Белоярское УТТиСТ', 'ИТЦ',
+                      'Учебно-производственный центр', 'УЭЗ и С', 'Управление связи', 'Бобровское ЛПУ',
+                      'Верхнеказымское ЛПУ', 'Ивдельское ЛПУ', 'Казымское ЛПУ',
+                      'Карпинское ЛПУ', 'Комсомольское ЛПУ', 'Краснотурьинское ЛПУ',
+                      'Лонг-Юганское ЛПУ', 'Надымское ЛПУ', 'Нижнетуринское ЛПУ', 'Ново-Уренгойское ЛПУ',
+                      'Ныдинское ЛПУ', 'Октябрьское ЛПУ', 'Пангодинское ЛПУ'
+                      'Пелымское ЛПУ', 'Перегребненское ЛПУ', 'Правохеттинское ЛПУ', 'Приозерное ЛПУ',
+                      'Пунгинское ЛПУ', 'Сорумское ЛПУ', 'Сосновское ЛПУ',
+                      'Таежное ЛПУ', 'Уральское ЛПУ', 'Ягельное ЛПУ', 'Ямбургское ЛПУ', 'Санаторий-профилакторий', 'КСК Норд'
               ]
 
     # Создаем объект DataValidation
@@ -483,7 +553,37 @@ def download_excel(request, pk):
     # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
     worksheet1.add_data_validation(data_validation)
     data_validation.add(worksheet1['H3'])
+
+    values2 = ['Декабрь', 'Январь', 'Февраль', 'Март', 'Апрель',
+               'Май',
+               'Июнь', 'Июль', 'Август', 'Сентябрь',
+               'Октябрь', 'Ноябрь',
+               ]
+
+    # Создаем объект DataValidation
+    data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values2)))
+
+    # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
+    worksheet1.add_data_validation(data_validation)
+    data_validation.add(worksheet1['F7'])
+    worksheet1['F7'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+
     #data_validation.add(worksheet1['I3'])
+
+    values2 = ['2022г', '2023г', '2024г', '2025г', '2026г',
+               '2027г',
+               '2028г', '2029г', '2030г'
+               ]
+
+    # Создаем объект DataValidation
+    data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values2)))
+
+    # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
+    worksheet1.add_data_validation(data_validation)
+    data_validation.add(worksheet1['G7'])
+
+    worksheet1['G7'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+
 
     workbook.save('example.xlsx')
 
@@ -497,18 +597,15 @@ def download_excel(request, pk):
     worksheet1['B8'] = 'Код КП(общий)'
     worksheet1['B8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-
     worksheet1.cell(row=9, column=3).value = checklist1.cod_kp_intervall
     worksheet1.merge_cells('C8')
     worksheet1['C8'] = 'Код КП(Промежуточный)'
     worksheet1['C8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-
     worksheet1.cell(row=9, column=4).value = checklist1.name_ip
     worksheet1.merge_cells('D5')
     worksheet1['D8'] = 'Наименования КП'
     worksheet1['D8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
-
 
     worksheet1.cell(row=9, column=5).value = checklist1.description_ip
     worksheet1.merge_cells('E8')
@@ -547,10 +644,10 @@ def download_excel(request, pk):
     worksheet1['K8'] = 'Количество выявленных ошибок/ нарушений'
     worksheet1['K8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-    worksheet1.cell(row=3, column=7).value = checklist1.filial
-    worksheet1.merge_cells('H3')
-    worksheet1['H3'] = 'Филиал'
-    worksheet1['H3'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
+    #worksheet1.cell(row=3, column=7).value = checklist1.filial
+    #worksheet1.merge_cells('H3')
+    #worksheet1['H3'] = 'Филиал'
+    #worksheet1['H3'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
     # Создание стиля границы
     border_style = Border(left=Side(border_style="thin", color="000000"),
@@ -582,15 +679,18 @@ def download_excel(request, pk):
                     max_length = len(cell.value)
             except:
                 pass
-        adjusted_height = 90
+        adjusted_height = 250
         alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
 
         for cell in worksheet1[row[8].column]:
             worksheet1.row_dimensions[cell.row].height = adjusted_height
             cell.alignment = alignment
 
+
     # Сохранение файла
     workbook.save('example.xlsx')
+
+
 
 
     # Применение стиля границы к ячейкам
@@ -599,18 +699,18 @@ def download_excel(request, pk):
             for cell in column:
                 cell.border = border_style
 
-
+    worksheet1.cell(row=20, column=1).value = "Дата:"
     worksheet1.cell(row=14, column=2).value = "_____________________"
     worksheet1.cell(row=15, column=2).value = "            (должность)"
     worksheet1.cell(row=14, column=4).value = "_____________________"
     worksheet1.cell(row=15, column=4).value = "             (подпись)"
     worksheet1.cell(row=14, column=6).value = "_____________________"
     worksheet1.cell(row=15, column=6).value = "                (ФИО)"
-    worksheet1.cell(row=14, column=8).value = "______________________"
-    worksheet1.cell(row=15, column=8).value = "                (дата)"
+    #worksheet1.cell(row=14, column=8).value = "______________________"
+    #worksheet1.cell(row=15, column=8).value = "                (дата)"
     #worksheet1.cell(row=3, column=8).value = "_____________________________________"
-    worksheet1.cell(row=4, column=8).value = " (наименование филиала)"
-    worksheet1.cell(row=2, column=11).value = "_____________________"
+    worksheet1.cell(row=4, column=8).value = "(наименование филиала)"
+    worksheet1.cell(row=2, column=11).value = "____________________"
     worksheet1.cell(row=3, column=11).value = "   Код отдела/службы"
     worksheet1.cell(row=7, column=5).value = "          Чек-лист за"
     worksheet1.cell(row=7, column=5).font = worksheet1.cell(row=7, column=5).font.copy(bold=True)
@@ -618,7 +718,10 @@ def download_excel(request, pk):
     worksheet1.cell(row=7, column=6).font = worksheet1.cell(row=7, column=6).font.copy(bold=True)
     worksheet1.cell(row=7, column=7).value = "            2023г."
     worksheet1.cell(row=7, column=7).font = worksheet1.cell(row=7, column=7).font.copy(bold=True)
-    worksheet1.cell(row=3, column=8).value = f"=L9"
+    worksheet1.cell(row=3, column=8).value = "Выберите филиал"
+    #worksheet1.cell(row=1, column=1).value = f'=CONCATENATE(A1,I9,B20,B9)'
+
+
 
 
     worksheet2 = workbook.create_sheet(title='Sheet2')
@@ -635,6 +738,7 @@ def download_excel(request, pk):
     for col_num, header in enumerate(headers2, 1):
         cell = worksheet2.cell(row=3, column=col_num)
         cell.value = header
+
 
     # Запись данных из базы данных в таблицу
     worksheet2.cell(row=4, column=1).value = checklist2.num
@@ -663,6 +767,7 @@ def download_excel(request, pk):
     sum_formula = f"=SUM(I1:I23)"
     worksheet2.cell(row=last_row , column=9).value = sum_formula
     worksheet2.cell(row=4, column=8).value = checklist2.notes
+
 
     total_errors = 0  # Инициализация переменной для суммирования ошибок
 
@@ -698,10 +803,11 @@ def download_excel(request, pk):
     worksheet2.cell(row=2, column=5).font = worksheet2.cell(row=2, column=5).font.copy(bold=True)
     worksheet2.cell(row=28, column=2).value = "_________________________"
     worksheet2.cell(row=29, column=2).value = "               (должность)"
-    worksheet2.cell(row=28, column=4).value = "_______________________"
-    worksheet2.cell(row=29, column=4).value = "               (ФИО)"
+    #worksheet2.cell(row=28, column=4).value = "_______________________"
+    #worksheet2.cell(row=29, column=4).value = "               (ФИО)"
     worksheet2.cell(row=28, column=6).value = "_________________"
     worksheet2.cell(row=29, column=6).value = "         (подпись)"
+
 
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -767,17 +873,33 @@ def download_excel1(request, pk):
                           )
 
     # Автоматическое расширение столбцов
-    for column in worksheet.columns:
-        max_length = 0
-        column_letter = get_column_letter(column[3].column)
+    for column in worksheet3.columns:
+        max_length = 15
+        column_letter = get_column_letter(column[8].column)
         for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+
+            except:
+                pass
+        adjusted_width = 20
+        worksheet1.column_dimensions[column_letter].width = adjusted_width
+
+    for row in worksheet3.rows:
+        max_length = 1500
+        for cell in row:
             try:
                 if len(str(cell.value)) > max_length:
                     max_length = len(cell.value)
             except:
                 pass
-        adjusted_width = (max_length + 2)
-        worksheet.column_dimensions[column_letter].width = adjusted_width
+        adjusted_height = 250
+        alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
+
+        for cell in worksheet1[row[8].column]:
+            worksheet1.row_dimensions[cell.row].height = adjusted_height
+            cell.alignment = alignment
 
     # Автоматическое расширение строк
 
