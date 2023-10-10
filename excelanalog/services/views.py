@@ -31,7 +31,7 @@ def upload_file(request):
 
         for row_num in range(3, 21):
             if worksheet.cell(row=row_num, column=2).value:
-                for col_num in range(1, worksheet.max_column + 1):
+                for col_num in range(1, 8):
                     if not worksheet.cell(row=row_num, column=col_num).value:
                         return HttpResponse(
                             '<div style="text-align: center; font-weight: bold; font-size: 24px; color: black; margin-top: 100px; font-family: Arial;">Пожалуйста, заполните все строки на одном уровне</div>')
@@ -719,7 +719,7 @@ def download_excel(request, pk):
     worksheet1.cell(row=7, column=7).value = "            2023г."
     worksheet1.cell(row=7, column=7).font = worksheet1.cell(row=7, column=7).font.copy(bold=True)
     worksheet1.cell(row=3, column=8).value = "Выберите филиал"
-    #worksheet1.cell(row=1, column=1).value = f'=CONCATENATE(A1,I9,B20,B9)'
+    worksheet1.cell(row=1, column=1).value = f'=СЦЕПИТЬ(B9;I9;H14)'
 
 
 
