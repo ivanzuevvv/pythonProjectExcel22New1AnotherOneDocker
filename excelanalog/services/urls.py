@@ -14,7 +14,9 @@ urlpatterns = [
     path('kkkk/', svod2, name='svod2'),
     path('checklist/<int:pk>/download/', download_excel, name='download_excel'),
     path('checklist1/<int:pk>/download/', download_excel1, name='download_excel1'),
-    path('upload/', upload_file, name='upload')
+    path('upload/', upload_file, name='upload'),
+
+    path('missing_data/', missing_data, name='missing_data'),
 
 
 ]

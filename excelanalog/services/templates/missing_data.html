@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Отсутствующие данные</title>
+</head>
+<body>
+    <h1>Отсутствующие данные</h1>
+    {% if message %}
+    <p>{{ message }}</p>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="file">
+        <button type="submit">Проверить данные</button>
+    </form>
+</body>
+</html>
