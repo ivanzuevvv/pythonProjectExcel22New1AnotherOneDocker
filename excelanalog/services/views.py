@@ -385,6 +385,10 @@ def svod(request):
 
             # Получение имени файла без расширения
             file_name = os.path.splitext(file.name)[0]
+            summary_df1['Количество контрольных процедур, не выявивших ошибки'] = summary_df1[
+                                                                                      'Количество выполненых КП'] - \
+                                                                                  summary_df1[
+                                                                                      'Количество выявленных ошибок']
 
             # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
             df1['Документ'] = file_name
@@ -398,6 +402,9 @@ def svod(request):
             summary_df1['филиал'] = 'Your Filial Value'
             summary_df1.fillna(method='ffill', inplace=True)
             summary_df1['филиал'] = summary_df1['филиал'].str.join('')
+
+            # Вставка нового столбца на 9-ую позицию
+
 
 
             # Чтение второго листа файла и взятие только значений
@@ -428,11 +435,14 @@ def svod(request):
         merged_df['Количество выполненых КП'] = merged_df['Количество выполненых КП'].fillna(0)
         merged_df['Количество выявленных ошибок'] = merged_df['Количество выявленных ошибок'].fillna(0)
 
+
         merged_df = merged_df.groupby('Код КП(общий)').sum().reset_index()
         merged_df['филиал'] = ''
 
         merged_df = merged_df.set_index('Код КП(общий)').transpose()
-        merged_df.insert(0, 'Количество', ['Количество выполненых КП', 'Количество выявленных ошибок', ''])
+        merged_df.insert(0, 'Количество', ['Количество выполненых КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки (отклонения, нарушения)'])
+
+
         merged_df.insert(0, 'Филиал', '')
         # Создание нового файла Excel с двумя листами
 
@@ -443,6 +453,11 @@ def svod(request):
                              how='left')
         merged_df1['Количество выполненых КП'] = merged_df1['Количество выполненых КП'].fillna(0)
         merged_df1['Количество выявленных ошибок'] = merged_df1['Количество выявленных ошибок'].fillna(0)
+
+        merged_df1['Количество контрольных процедур, не выявивших ошибки'] = merged_df1[
+                                                                                  'Количество выполненых КП'] - \
+                                                                              merged_df1[
+                                                                                  'Количество выявленных ошибок']
 
         merged_df1 = merged_df1.groupby('Код КП(общий)').sum().reset_index()
         merged_df1['Документ, подтверждающий проведение контрольной процедуры'] = 'Чек-лист/Реестр объектов контроля'
@@ -627,8 +642,12 @@ def svod(request):
             worksheet1.cell(row=last_row1 + 0, column=8).value = sum_formula1
 
             last_row2 = worksheet1.max_row
-            sum_formula1 = " "
+            sum_formula1 = f"=SUM(I1:I{last_row})"
             worksheet1.cell(row=last_row2 + 0, column=9).value = sum_formula1
+
+            last_row3 = worksheet1.max_row
+            sum_formula1 = " "
+            worksheet1.cell(row=last_row3 + 0, column=10).value = sum_formula1
 
             last_row2 = worksheet1.max_row
             sum_formula1 = "Итого:"
@@ -741,6 +760,88 @@ def svod(request):
 
             worksheet3.cell(row=3, column=4).value = "Осуществляемых в целях налогового мониторинга"
             worksheet3.cell(row=3, column=4).font = Font(bold=True)
+            worksheet3['C11'] = '=C9-C10'
+            worksheet3['D11'] = '=D9-D10'
+            worksheet3['E11'] = '=E9-E10'
+            worksheet3['F11'] = '=F9-F10'
+            worksheet3['G11'] = '=G9-G10'
+            worksheet3['H11'] = '=H9-H10'
+            worksheet3['I11'] = '=I9-I10'
+            worksheet3['J11'] = '=J9-J10'
+            worksheet3['K11'] = '=K9-K10'
+            worksheet3['L11'] = '=L9-L10'
+            worksheet3['M11'] = '=M9-M10'
+            worksheet3['N11'] = '=N9-N10'
+            worksheet3['O11'] = '=O9-O10'
+            worksheet3['P11'] = '=P9-P10'
+            worksheet3['Q11'] = '=Q9-Q10'
+            worksheet3['R11'] = '=R9-R10'
+            worksheet3['S11'] = '=S9-S10'
+            worksheet3['T11'] = '=T9-T10'
+            worksheet3['U11'] = '=U9-U10'
+            worksheet3['V11'] = '=V9-V10'
+            worksheet3['W11'] = '=W9-W10'
+            worksheet3['X11'] = '=X9-X10'
+            worksheet3['Y11'] = '=Y9-Y10'
+            worksheet3['Z11'] = '=Z9-Z10'
+            worksheet3['AA11'] = '=AA9-AA10'
+            worksheet3['AB11'] = '=AB9-AB10'
+            worksheet3['AC11'] = '=AC9-AC10'
+            worksheet3['AD11'] = '=ADB9-AD10'
+            worksheet3['AE11'] = '=AE9-AE10'
+            worksheet3['AF11'] = '=AF9-AF10'
+            worksheet3['AG11'] = '=AG9-AG10'
+            worksheet3['AH11'] = '=AH9-AH10'
+            worksheet3['AH11'] = '=AH9-AH10'
+            worksheet3['AI11'] = '=AI9-AI10'
+            worksheet3['AJ11'] = '=AJ9-AJ10'
+            worksheet3['AK11'] = '=AK9-AK10'
+            worksheet3['AL11'] = '=AL9-AL10'
+            worksheet3['AM11'] = '=AM9-AM10'
+            worksheet3['AN11'] = '=AN9-AN10'
+            worksheet3['AO11'] = '=AO9-AO10'
+            worksheet3['AP11'] = '=AP9-AP10'
+            worksheet3['AQ11'] = '=AQ9-AQ10'
+            worksheet3['AR11'] = '=AR9-AR10'
+            worksheet3['AS11'] = '=AS9-AS10'
+            worksheet3['AT11'] = '=AT9-AT10'
+            worksheet3['AU11'] = '=AU9-AU10'
+            worksheet3['AV11'] = '=AV9-AV10'
+            worksheet3['AW11'] = '=AW9-AW10'
+            worksheet3['AX11'] = '=AX9-AX10'
+            worksheet3['AZ11'] = '=AZ9-AZ10'
+            worksheet3['AY11'] = '=AY9-AY10'
+            worksheet3['BA11'] = '=BA9-BA10'
+            worksheet3['BB11'] = '=BB9-BB10'
+            worksheet3['BC11'] = '=BC9-BC10'
+            worksheet3['BD11'] = '=BD9-BD10'
+            worksheet3['BE11'] = '=BE9-BE10'
+            worksheet3['BF11'] = '=BF9-BF10'
+            worksheet3['BG11'] = '=BG9-BG10'
+            worksheet3['BH11'] = '=BH9-BH10'
+            worksheet3['BI11'] = '=BI9-BI10'
+            worksheet3['BJ11'] = '=BJ9-BJ10'
+            worksheet3['BK11'] = '=BK9-BK10'
+            worksheet3['BL11'] = '=BL9-BL10'
+            worksheet3['BM11'] = '=BM9-BM10'
+            worksheet3['BN11'] = '=BN9-BN10'
+            worksheet3['BO11'] = '=BO9-BO10'
+            worksheet3['BP11'] = '=BP9-BP10'
+            worksheet3['BQ11'] = '=BQ9-BQ10'
+            worksheet3['BR11'] = '=BR9-BR10'
+            worksheet3['BS11'] = '=BS9-BS10'
+            worksheet3['BT11'] = '=BT9-BT10'
+            worksheet3['BU11'] = '=BU9-BU10'
+            worksheet3['BV11'] = '=BV9-BV10'
+            worksheet3['BW11'] = '=BW9-BW10'
+            worksheet3['BX11'] = '=BX9-BX10'
+            worksheet3['BY11'] = '=BY9-BY10'
+            worksheet3['BZ11'] = '=BZ9-BZ10'
+            worksheet3['CA11'] = '=CA9-CA10'
+            worksheet3['CB11'] = '=CB9-CB10'
+            worksheet3['CB11'] = '=CB9-CB10'
+            worksheet3['CC11'] = '=CC9-CC10'
+
 
             #last_row = worksheet3.max_row
             #sum_formula = f"=SUM(B1:D{last_row})"
@@ -762,9 +863,23 @@ def svod(request):
             #cell.value = sum_formula1
             #cell.alignment = Alignment(horizontal='right')
 
+            worksheet4 = writer.sheets['Sheet4']
             # После удаления столбка 4, столбок 6 станет столбком 7
+            last_row = worksheet4.max_row
+            sum_formula = "Итого:"
+            worksheet4.cell(row=last_row + 1, column=2).value = sum_formula
 
+            last_row1 = worksheet4.max_row
+            sum_formula1 = f"=SUM(C1:C{last_row})"
+            worksheet4.cell(row=last_row1 + 0, column=3).value = sum_formula1
 
+            last_row2 = worksheet4.max_row
+            sum_formula1 = f"=SUM(D1:D{last_row})"
+            worksheet4.cell(row=last_row2 + 0, column=4).value = sum_formula1
+
+            last_row2 = worksheet4.max_row
+            sum_formula1 = f"=SUM(E1:E{last_row})"
+            worksheet4.cell(row=last_row2 + 0, column=5).value = sum_formula1
 
             # Автоматическое расширение столбцов для второго листа
 
@@ -1321,7 +1436,9 @@ def svod2(request):
         summary_df1 = pd.DataFrame(
             columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
                      'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
-                     'Количество выполненых КП', 'Количество выявленных ошибок','Документ', 'Филиал'])
+                     'Количество выполненых КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки', 'Документ', 'Филиал'])
+
+
 
 
         summary_df2 = pd.DataFrame(
@@ -1371,10 +1488,11 @@ def svod2(request):
         # Обработка каждого загруженного файла
         for file in files:
             # Чтение первого листа файла и взятие только значений
-            df1 = pd.read_excel(file, sheet_name='Sheet', usecols="A:J", header=None, skiprows=13, nrows=100)
+            df1 = pd.read_excel(file, sheet_name='Sheet', usecols="A:K", header=None, skiprows=13, nrows=100)
             df1 = df1.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
                      'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
-                     'Количество выполненых КП', 'Количество выявленных ошибок','Документ', 'Филиал'], axis=1)
+                     'Количество выполненых КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки','Документ', 'Филиал'], axis=1)
+
 
             # Получение имени файла без расширения
             file_name = os.path.splitext(file.name)[0]
@@ -1386,7 +1504,11 @@ def svod2(request):
                      inplace=True)
             df1 = df1.reset_index(drop=True)
             df1 = df1.rename_axis([None], axis=1)
+
+
+
             summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
+            
 
 
 
@@ -1442,6 +1564,8 @@ def svod2(request):
 
             ], axis=1)
 
+
+
             summary_df3 = pd.concat([summary_df3, df3], ignore_index=True)
 
 
@@ -1453,6 +1577,11 @@ def svod2(request):
             summary_df4 = pd.concat([summary_df4, df4], ignore_index=True)
             summary_df4 = summary_df4.groupby(['№ п/п', 'Наименование КП', 'Код КП(общий)', ]).agg(
                 {'Количество выполненых КП': 'sum', 'Количество выявленных ошибок': 'sum'}).reset_index()
+
+            summary_df4['Количество контрольных процедур, не выявивших ошибки'] = summary_df4[
+                                                                                     'Количество выполненых КП'] - \
+                                                                                 summary_df4[
+                                                                                     'Количество выявленных ошибок']
 
 
 
@@ -1475,7 +1604,7 @@ def svod2(request):
             worksheet1 = writer.sheets['Sheet']
             worksheet2 = writer.sheets['Sheet2']
             worksheet3 = writer.sheets['Sheet3']
-            worksheet3 = writer.sheets['Sheet4']
+            worksheet4 = writer.sheets['Sheet4']
 
 
 
@@ -1531,7 +1660,7 @@ def svod2(request):
             worksheet1.delete_cols(3)
             worksheet1.delete_cols(3)
             worksheet1.delete_cols(3)
-            worksheet1.delete_cols(5)
+            worksheet1.delete_cols(6)
 
             #worksheet2.delete_cols(3)
             #worksheet2.delete_cols(4)
@@ -1539,18 +1668,368 @@ def svod2(request):
             #worksheet2.delete_cols(7)
             #worksheet2.delete_cols(6)
 
+            worksheet4 = writer.sheets['Sheet4']
+            # После удаления столбка 4, столбок 6 станет столбком 7
+            last_row = worksheet4.max_row
+            sum_formula = "Итого:"
+            worksheet4.cell(row=last_row + 1, column=3).value = sum_formula
 
+            last_row1 = worksheet4.max_row
+            sum_formula1 = f"=SUM(D1:D{last_row})"
+            worksheet4.cell(row=last_row1 + 0, column=4).value = sum_formula1
+
+            last_row2 = worksheet4.max_row
+            sum_formula1 = f"=SUM(E1:E{last_row})"
+            worksheet4.cell(row=last_row2 + 0, column=5).value = sum_formula1
+
+            last_row2 = worksheet4.max_row
+            sum_formula1 = f"=SUM(F1:F{last_row})"
+            worksheet4.cell(row=last_row2 + 0, column=6).value = sum_formula1
+            #################################################################################33
+
+
+            worksheet3 = writer.sheets['Sheet3']
+            # После удаления столбка 4, столбок 6 станет столбком 7
+            last_row = worksheet3.max_row
+            sum_formula = "Итого:"
+            worksheet3.cell(row=last_row + 1, column=2).value = sum_formula
+
+            last_row1 = worksheet3.max_row
+            sum_formula1 = f"=SUM(C1:C{last_row})"
+            worksheet3.cell(row=last_row1 + 0, column=3).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(D1:D{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=4).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(E1:E{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=5).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(F1:F{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=6).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(G1:G{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=7).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(H1:H{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=8).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(I1:I{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=9).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(J1:J{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=10).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(K1:K{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=11).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(L1:L{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=12).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(M1:M{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=13).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(N1:N{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=14).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(O1:O{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=15).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(P1:P{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=16).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(Q1:Q{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=17).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(R1:R{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=18).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(S1:S{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=19).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(T1:T{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=20).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(U1:U{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=21).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(V1:V{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=22).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(W1:W{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=23).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(X1:X{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=24).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(Y1:Y{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=25).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(Z1:Z{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=26).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AA1:AA{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=27).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AB1:AB{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=28).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AC1:AC{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=29).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AD1:AD{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=30).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AE1:AE{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=31).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AF1:AF{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=32).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AG1:AG{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=33).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AH1:AH{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=34).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AI1:AI{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=35).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AJ1:AJ{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=36).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AK1:AK{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=37).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AL1:AL{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=38).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AM1:AM{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=39).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AN1:AN{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=40).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AO1:AO{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=41).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AP1:AP{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=42).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AQ1:AQ{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=43).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AR1:AR{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=44).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AS1:AS{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=45).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AT1:AT{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=46).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AU1:AU{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=47).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AV1:AV{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=48).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AW1:AW{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=49).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AX1:AX{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=50).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AY1:AY{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=51).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(AZ1:AZ{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=52).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BA1:BA{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=53).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BB1:BB{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=54).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BC1:BC{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=55).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BD1:BD{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=56).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BE1:BE{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=57).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BF1:BF{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=58).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BG1:BG{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=59).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BH1:BH{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=60).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BI1:B{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=61).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BJ1:BJ{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=62).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BK1:B{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=63).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BL1:BL{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=64).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BM1:BM{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=65).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BN1:BN{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=66).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BO1:BO{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=67).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BP1:BP{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=68).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BQ1:BQ{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=69).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BR1:BR{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=70).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BS1:BS{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=71).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BT1:BT{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=72).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BU1:BU{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=73).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BV1:BV{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=74).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BW1:BW{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=75).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BX1:B{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=76).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BY1:BY{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=77).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(BZ1:BZ{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=78).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(CA1:CA{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=79).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(CB1:CB{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=80).value = sum_formula1
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(CD1:CD{last_row})"
+            worksheet3.cell(row=last_row2 + 0, column=81).value = sum_formula1
+
+
+
+            worksheet3.insert_cols(3)
+            worksheet3.cell(row=1, column=3).value = "Итого"
+
+            last_row2 = worksheet3.max_row
+            sum_formula1 = f"=SUM(C2:CD2)"
+            worksheet3.cell(row=2, column=3).value = sum_formula1
 
 
             # Заголовки столбцов
 
-            # Добавляем столбец "филиалы1" с указанными значениями
+            # ДоFбавляем столбец "филиалы1" с указанными значениями
 
 
 
 ###############################################################################
 
             # Добавляем заголовки для столбцов
+
 
 
 
