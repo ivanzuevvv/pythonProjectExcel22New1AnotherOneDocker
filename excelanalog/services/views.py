@@ -67,7 +67,7 @@ def svod(request):
 
         # Создание пустого сводного DataFrame для первого листа
         summary_df1 = pd.DataFrame(
-            columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП',
+            columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование КП', 'Описание КП',
                      'Переодичность проведения', 'Способ подсчета результаты проведения КП',
                      'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
                      'Количество выполненых КП', 'Количество выявленных ошибок'])
@@ -378,7 +378,7 @@ def svod(request):
         for file in files:
             # Чтение первого листа файла и взятие только значений
             df1 = pd.read_excel(file, sheet_name='Sheet', usecols="A:K", header=None, skiprows=8, nrows=1)
-            df1 = df1.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП', 'Описание КП',
+            df1 = df1.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование КП', 'Описание КП',
                                 'Переодичность проведения', 'Способ подсчета результаты проведения КП',
                                 'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
                                 'Количество выполненых КП', 'Количество выявленных ошибок', ], axis=1)
@@ -391,7 +391,6 @@ def svod(request):
                                                                                       'Количество выявленных ошибок']
 
             # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
-            df1['Документ'] = file_name
 
             df1.drop(['Способ подсчета результаты проведения КП', 'Описание КП', 'Переодичность проведения'], axis=1,
                      inplace=True)
@@ -399,9 +398,9 @@ def svod(request):
             df1 = df1.rename_axis([None], axis=1)
             summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
 
-            summary_df1['филиал'] = 'Your Filial Value'
-            summary_df1.fillna(method='ffill', inplace=True)
-            summary_df1['филиал'] = summary_df1['филиал'].str.join('')
+            #summary_df1['филиал'] = 'Your Filial Value'
+            #summary_df1.fillna(method='ffill', inplace=True)
+            #summary_df1['филиал'] = summary_df1['филиал'].str.join('')
 
             # Вставка нового столбца на 9-ую позицию
 
@@ -443,7 +442,7 @@ def svod(request):
         merged_df.insert(0, 'Количество', ['Количество выполненых КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки (отклонения, нарушения)'])
 
 
-        merged_df.insert(0, 'Филиал', '')
+        merged_df.insert(0, 'Код БС', '')
         # Создание нового файла Excel с двумя листами
 
 
@@ -842,6 +841,37 @@ def svod(request):
             worksheet3['CB11'] = '=CB9-CB10'
             worksheet3['CC11'] = '=CC9-CC10'
 
+            worksheet3.insert_cols(84)
+            worksheet3.cell(row=8, column=82).value = "Итого"
+
+            sum_formula1 = f"=SUM(D9:CC9)"
+            worksheet3.cell(row=9, column=82).value = sum_formula1
+
+            sum_formula1 = f"=SUM(D10:CC10)"
+            worksheet3.cell(row=10, column=82).value = sum_formula1
+
+            sum_formula1 = f"=SUM(D11:CC11)"
+            worksheet3.cell(row=11, column=82).value = sum_formula1
+
+            # last_row2 = worksheet3.max_row
+            # sum_formula1 = f"=SUM(D3:CD3)"
+            # worksheet3.cell(row=3, column=3).value = sum_formula1
+
+            # last_row2 = worksheet3.max_row
+            # sum_formula1 = f"=SUM(D4:CD4)"
+            # worksheet3.cell(row=4, column=3).value = sum_formula1
+
+            # last_row2 = worksheet3.max_row
+            # sum_formula1 = f"=SUM(D5:CD5)"
+            # worksheet3.cell(row=5, column=3).value = sum_formula1
+
+            # last_row2 = worksheet3.max_row
+            # sum_formula1 = f"=SUM(D6:CD6)"
+            # worksheet3.cell(row=6, column=3).value = sum_formula1
+
+            # last_row2 = worksheet3.max_row
+            # sum_formula1 = f"=SUM(D7:CD7)"
+            # worksheet3.cell(row=7, column=3).value = sum_formula1
 
             #last_row = worksheet3.max_row
             #sum_formula = f"=SUM(B1:D{last_row})"
@@ -1449,7 +1479,7 @@ def svod2(request):
 
         ##################################################################################################################
         summary_df3 = pd.DataFrame(
-            columns=['Филиал', 'Количество', 'НУ-ОБЩ-1-КП-001', 'НУ-ОБЩ-1-КП-002', 'НУ-ОБЩ-1-КП-003',
+            columns=['Код БС', 'Количество', 'НУ-ОБЩ-1-КП-001', 'НУ-ОБЩ-1-КП-002', 'НУ-ОБЩ-1-КП-003',
 'НУ-ОБЩ-1-КП-004', 'НУ-ОБЩ-1-КП-005', 'НУ-ОБЩ-1-КП-006',
 'НУ-ОБЩ-1-КП-007', 'НУ-ОБЩ-1-КП-008', 'НУ-ОБЩ-1-КП-009',
 'НУ-ОБЩ-1-КП-010', 'НУ-ОБЩ-1-КП-011', 'НУ-ПРИБ-1-КП-001',
@@ -1475,7 +1505,7 @@ def svod2(request):
 'НУ-НДПИ-1-КП-006', 'НУ-ВН-1-КП-001', 'НУ-ВН-1-КП-002',
 'НУ-ВН-1-КП-003', 'НУ-НДФЛ-1-КП-001', 'НУ-НДФЛ-1-КП-003',
 'НУ-НДФЛ-1-КП-004', 'НУ-НДФЛ-1-КП-005', 'НУ-НДФЛ-1-КП-006',
-'НУ-СВ-1-КП-001', 'НУ-СВ-1-КП-002', 'НУ-СВ-1-КП-003'])
+'НУ-СВ-1-КП-001', 'НУ-СВ-1-КП-002', 'НУ-СВ-1-КП-003', 'Итого'])
 
         summary_df4 = pd.DataFrame(
             columns=['№ п/п', 'Код КП(общий)', 'Количество выполненых КП', 'Количество выявленных ошибок', 'Документ, подтверждающий проведение контрольной процедуры', 'Наименование КП'])
@@ -1488,40 +1518,40 @@ def svod2(request):
         # Обработка каждого загруженного файла
         for file in files:
             # Чтение первого листа файла и взятие только значений
-            df1 = pd.read_excel(file, sheet_name='Sheet', usecols="A:K", header=None, skiprows=13, nrows=100)
-            df1 = df1.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
-                     'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
-                     'Количество выполненых КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки','Документ', 'Филиал'], axis=1)
+#            df1 = pd.read_excel(file, sheet_name='Sheet', usecols="A:K", header=None, skiprows=13, nrows=10000)
+#            df1 = df1.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
+#                     'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+#                     'Количество выполненых КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки','Документ', 'Филиал'], axis=1)
 
 
             # Получение имени файла без расширения
-            file_name = os.path.splitext(file.name)[0]
+#            file_name = os.path.splitext(file.name)[0]
 
             # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
-            df1['Документ'] = file_name
+#            df1['Документ'] = file_name
 
-            df1.drop(['Документ'], axis=1,
-                     inplace=True)
-            df1 = df1.reset_index(drop=True)
-            df1 = df1.rename_axis([None], axis=1)
+#            df1.drop(['Документ'], axis=1,
+#                     inplace=True)
+#            df1 = df1.reset_index(drop=True)
+#            df1 = df1.rename_axis([None], axis=1)
 
 
 
-            summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
+#            summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
             
 
 
 
             # Чтение второго листа файла и взятие только значений
-            df2 = pd.read_excel(file, sheet_name='Sheet', usecols="A:J", header=None, skiprows=13, nrows=100)
-            df2 = df2.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
-                                'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
-                                'Количество выполненых КП', 'Количество выявленных ошибок', 'Документ', 'Филиал'],
-                               axis=1)
+#            df2 = pd.read_excel(file, sheet_name='Sheet', usecols="A:K", header=None, skiprows=13, nrows=10000)
+#            df2 = df2.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование ИП',
+#                                'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+#                                'Количество выполненых КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки', 'Документ', 'Филиал'],
+#                               axis=1)
 
 
-            summary_df2 = summary_df1.groupby(['номер п/п', 'Наименование ИП', 'Код КП(общий)',]).agg(
-                {'Количество выполненых КП': 'sum', 'Количество выявленных ошибок': 'sum'}).reset_index()
+#            summary_df2 = summary_df1.groupby(['номер п/п', 'Наименование ИП', 'Код КП(общий)', 'Количество контрольных процедур, не выявивших ошибки', ]).agg(
+#                {'Количество выполненых КП': 'sum', 'Количество выявленных ошибок': 'sum'}).reset_index()
 
 
 
@@ -1533,8 +1563,8 @@ def svod2(request):
 
             ###############################################################################################################################
             # Чтение третьего листа файла и взятие только значений
-            df3 = pd.read_excel(file, sheet_name='Sheet3', usecols="A:CC", header=None, skiprows=8, nrows=100)
-            df3 = df3.set_axis(['Филиал', 'Количество', 'НУ-ОБЩ-1-КП-001', 'НУ-ОБЩ-1-КП-002', 'НУ-ОБЩ-1-КП-003',
+            df3 = pd.read_excel(file, sheet_name='Sheet3', usecols="A:CD", header=None, skiprows=8, nrows=10000)
+            df3 = df3.set_axis(['Код БС', 'Количество', 'НУ-ОБЩ-1-КП-001', 'НУ-ОБЩ-1-КП-002', 'НУ-ОБЩ-1-КП-003',
 'НУ-ОБЩ-1-КП-004', 'НУ-ОБЩ-1-КП-005', 'НУ-ОБЩ-1-КП-006',
 'НУ-ОБЩ-1-КП-007', 'НУ-ОБЩ-1-КП-008', 'НУ-ОБЩ-1-КП-009',
 'НУ-ОБЩ-1-КП-010', 'НУ-ОБЩ-1-КП-011', 'НУ-ПРИБ-1-КП-001',
@@ -1560,7 +1590,7 @@ def svod2(request):
 'НУ-НДПИ-1-КП-006', 'НУ-ВН-1-КП-001', 'НУ-ВН-1-КП-002',
 'НУ-ВН-1-КП-003', 'НУ-НДФЛ-1-КП-001', 'НУ-НДФЛ-1-КП-003',
 'НУ-НДФЛ-1-КП-004', 'НУ-НДФЛ-1-КП-005', 'НУ-НДФЛ-1-КП-006',
-'НУ-СВ-1-КП-001', 'НУ-СВ-1-КП-002', 'НУ-СВ-1-КП-003'
+'НУ-СВ-1-КП-001', 'НУ-СВ-1-КП-002', 'НУ-СВ-1-КП-003', 'Итого'
 
             ], axis=1)
 
@@ -1569,8 +1599,8 @@ def svod2(request):
             summary_df3 = pd.concat([summary_df3, df3], ignore_index=True)
 
 
-            df4 = pd.read_excel(file, sheet_name='Sheet4', usecols="A:F", header=None, skiprows=1, nrows=100)
-            df4 = df4.set_axis(['№ п/п', 'Код КП(общий)', 'Количество выполненых КП', 'Количество выявленных ошибок', 'Документ, подтверждающий проведение контрольной процедуры', 'Наименование КП'
+            df4 = pd.read_excel(file, sheet_name='Sheet4', usecols="A:G", header=None, skiprows=1, nrows=10000)
+            df4 = df4.set_axis(['№ п/п', 'Код КП(общий)', 'Количество выполненых КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки' ,'Документ, подтверждающий проведение контрольной процедуры', 'Наименование КП'
 
                                 ], axis=1)
 
@@ -1578,11 +1608,15 @@ def svod2(request):
             summary_df4 = summary_df4.groupby(['№ п/п', 'Наименование КП', 'Код КП(общий)', ]).agg(
                 {'Количество выполненых КП': 'sum', 'Количество выявленных ошибок': 'sum'}).reset_index()
 
+
             summary_df4['Количество контрольных процедур, не выявивших ошибки'] = summary_df4[
                                                                                      'Количество выполненых КП'] - \
                                                                                  summary_df4[
                                                                                      'Количество выявленных ошибок']
 
+
+            summary_df4[
+                'Документ, подтверждающий проведение контрольной процедуры'] = 'Чек-лист/Реестр объектов контроля'
 
 
             # Группировка данных по полю 'Код КП(общий)' и суммирование полей 'Количество выполненых КП' и 'Количество выявленных ошибок'
@@ -1591,8 +1625,8 @@ def svod2(request):
 
         # Создание нового файла Excel с двумя листами
         with pd.ExcelWriter('summary.xlsx', engine='openpyxl') as writer:
-            summary_df1.to_excel(writer, sheet_name='Sheet', index=False)
-            summary_df2.to_excel(writer, sheet_name='Sheet2', index=False)
+#            summary_df1.to_excel(writer, sheet_name='Sheet', index=False)
+#            summary_df2.to_excel(writer, sheet_name='Sheet2', index=False)
             summary_df3.to_excel(writer, sheet_name='Sheet3', index=False)
             summary_df4.to_excel(writer, sheet_name='Sheet4', index=False)
 
@@ -1601,8 +1635,8 @@ def svod2(request):
             workbook = writer.book
 
             # Получение объекта worksheet для первого листа
-            worksheet1 = writer.sheets['Sheet']
-            worksheet2 = writer.sheets['Sheet2']
+#            worksheet1 = writer.sheets['Sheet']
+#            worksheet2 = writer.sheets['Sheet2']
             worksheet3 = writer.sheets['Sheet3']
             worksheet4 = writer.sheets['Sheet4']
 
@@ -1927,7 +1961,7 @@ def svod2(request):
             worksheet3.cell(row=last_row2 + 0, column=60).value = sum_formula1
 
             last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BI1:B{last_row})"
+            sum_formula1 = f"=SUM(BI1:BI{last_row})"
             worksheet3.cell(row=last_row2 + 0, column=61).value = sum_formula1
 
             last_row2 = worksheet3.max_row
@@ -1935,7 +1969,7 @@ def svod2(request):
             worksheet3.cell(row=last_row2 + 0, column=62).value = sum_formula1
 
             last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BK1:B{last_row})"
+            sum_formula1 = f"=SUM(BK1:BK{last_row})"
             worksheet3.cell(row=last_row2 + 0, column=63).value = sum_formula1
 
             last_row2 = worksheet3.max_row
@@ -1987,37 +2021,59 @@ def svod2(request):
             worksheet3.cell(row=last_row2 + 0, column=75).value = sum_formula1
 
             last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BX1:B{last_row})"
+            sum_formula1 = f"=SUM(BX1:BX{last_row})"
             worksheet3.cell(row=last_row2 + 0, column=76).value = sum_formula1
 
             last_row2 = worksheet3.max_row
             sum_formula1 = f"=SUM(BY1:BY{last_row})"
             worksheet3.cell(row=last_row2 + 0, column=77).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BZ1:BZ{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=78).value = sum_formula1
+            #last_row2 = worksheet3.max_row
+            #sum_formula1 = f"=SUM(BZ1:BZ{last_row})"
+            #worksheet3.cell(row=last_row2 + 0, column=78).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(CA1:CA{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=79).value = sum_formula1
+            #last_row2 = worksheet3.max_row
+            #sum_formula1 = f"=SUM(CA1:CA{last_row})"
+            #worksheet3.cell(row=last_row2 + 0, column=79).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(CB1:CB{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=80).value = sum_formula1
+            #last_row2 = worksheet3.max_row
+            #sum_formula1 = f"=SUM(CB1:CB{last_row})"
+            #worksheet3.cell(row=last_row2 + 0, column=80).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(CD1:CD{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=81).value = sum_formula1
+            #last_row2 = worksheet3.max_row
+            #sum_formula1 = f"=SUM(CD1:CD{last_row})"
+            #worksheet3.cell(row=last_row2 + 0, column=81).value = sum_formula1
+##########################################################################################
 
 
+            #worksheet3.insert_cols(3)
+            #worksheet3.cell(row=1, column=3).value = "Итого"
 
-            worksheet3.insert_cols(3)
-            worksheet3.cell(row=1, column=3).value = "Итого"
+            #last_row2 = worksheet3.max_row
+            #sum_formula1 = f"=SUM(D2:CD2)"
+            #worksheet3.cell(row=2, column=3).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(C2:CD2)"
-            worksheet3.cell(row=2, column=3).value = sum_formula1
+            #last_row2 = worksheet3.max_row
+            #sum_formula1 = f"=SUM(D3:CD3)"
+            #worksheet3.cell(row=3, column=3).value = sum_formula1
+
+            #last_row2 = worksheet3.max_row
+            #sum_formula1 = f"=SUM(D4:CD4)"
+            #worksheet3.cell(row=4, column=3).value = sum_formula1
+
+            #last_row2 = worksheet3.max_row
+            #sum_formula1 = f"=SUM(D5:CD5)"
+            #worksheet3.cell(row=5, column=3).value = sum_formula1
+
+            #last_row2 = worksheet3.max_row
+            #sum_formula1 = f"=SUM(D6:CD6)"
+            #worksheet3.cell(row=6, column=3).value = sum_formula1
+
+            #last_row2 = worksheet3.max_row
+            #sum_formula1 = f"=SUM(D7:CD7)"
+            #worksheet3.cell(row=7, column=3).value = sum_formula1
+
+
 
 
             # Заголовки столбцов
@@ -2051,20 +2107,20 @@ def svod2(request):
 
 
 
-            for row in range(worksheet1.max_row, 0, -1):
-                max_length = 20
-                for cell in worksheet1[row]:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                worksheet1.row_dimensions[row].height = max_length
+#            for row in range(worksheet1.max_row, 0, -1):
+#                max_length = 20
+#                for cell in worksheet1[row]:
+#                    if len(str(cell.value)) > max_length:
+#                        max_length = len(str(cell.value))
+#                worksheet1.row_dimensions[row].height = max_length
 
-                for column_cells in worksheet1.columns:
-                    length = max(len(str(cell.value)) for cell in column_cells)
-                    worksheet1.column_dimensions[column_cells[0].column_letter].width = length
+#                for column_cells in worksheet1.columns:
+#                    length = max(len(str(cell.value)) for cell in column_cells)
+#                    worksheet1.column_dimensions[column_cells[0].column_letter].width = length
 
                 # Установка выравнивания для каждой ячейки в строке
-                for cell in worksheet1[row]:
-                    cell.alignment = Alignment( vertical='center', wrap_text=True)
+#                for cell in worksheet1[row]:
+#                    cell.alignment = Alignment( vertical='center', wrap_text=True)
             # Опускание таблицы на 12 строк ниже начиная с первой строки
 
                     # Установка выравнивания для каждой ячейки в строке
@@ -2073,19 +2129,19 @@ def svod2(request):
                     # Опускание таблицы на 2 строк ниже начиная с первой строки
 
                     # Автоматическое расширение столбцов для второго листа
-                    for column_cells in worksheet2.columns:
-                        length = max(len(str(cell.value)) for cell in column_cells)
-                        worksheet2.column_dimensions[column_cells[0].column_letter].width = length
+#                    for column_cells in worksheet2.columns:
+#                        length = max(len(str(cell.value)) for cell in column_cells)
+#                        worksheet2.column_dimensions[column_cells[0].column_letter].width = length
 
-                        for cell in worksheet2[row]:
-                            cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
+#                        for cell in worksheet2[row]:
+#                            cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
 
-                for column_cells in worksheet3.columns:
-                    length = max(len(str(cell.value)) for cell in column_cells)
-                    worksheet3.column_dimensions[column_cells[0].column_letter].width = length
+#                for column_cells in worksheet3.columns:
+#                    length = max(len(str(cell.value)) for cell in column_cells)
+#                    worksheet3.column_dimensions[column_cells[0].column_letter].width = length
 
-                    for cell in worksheet2[row]:
-                        cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
+#                    for cell in worksheet2[row]:
+#                        cell.alignment = Alignment(horizontal='centerContinuous', vertical='center', wrap_text=True)
 
 
             workbook.save("example2.xlsx")
