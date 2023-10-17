@@ -29,7 +29,7 @@ def upload_file(request):
         workbook = openpyxl.load_workbook(file)
         worksheet = workbook['Sheet2']  # Имя вашего второго листа
 
-        for row_num in range(3, 21):
+        for row_num in range(10, 2000):
             if worksheet.cell(row=row_num, column=2).value:
                 for col_num in range(1, 8):
                     if not worksheet.cell(row=row_num, column=col_num).value:
@@ -101,7 +101,7 @@ def svod(request):
 'НУ-ТН-1-КП-002', 'НУ-ТН-1-КП-005', 'НУ-ТН-1-КП-004',
 'НУ-ЗН-1-КП-001', 'НУ-ЗН-1-КП-002', 'НУ-ЗН-1-КП-003',
 'НУ-ЗН-1-КП-004', 'НУ-НДПИ-1-КП-001', 'НУ-НДПИ-1-КП-002',
-'НУ-НДПИ-1-КП-006', 'НУ-ВН-1-КП-001', 'НУ-ВН-1-КП-002',
+'НУ-НДПИ-1-КП-006', 'НУ-ВН-1-КП-0001', 'НУ-ВН-1-КП-002',
 'НУ-ВН-1-КП-003', 'НУ-НДФЛ-1-КП-001', 'НУ-НДФЛ-1-КП-003',
 'НУ-НДФЛ-1-КП-004', 'НУ-НДФЛ-1-КП-005', 'НУ-НДФЛ-1-КП-006',
 'НУ-СВ-1-КП-001', 'НУ-СВ-1-КП-002', 'НУ-СВ-1-КП-003',]
@@ -141,8 +141,8 @@ def svod(request):
                   'НУ-ПРИБ-1-КП-020',
                  'НУ-ПРИБ-1-КП-021',
                   'НУ-ПРИБ-1-КП-025',
-                  'НУ-ПРИБ-1-КП-026'
-               'НУ-ПРИБ-1-КП-028',
+                  'НУ-ПРИБ-1-КП-026',
+                    'НУ-ПРИБ-1-КП-028',
                   'НУ-ПРИБ-1-КП-029',
                   'НУ-ПРИБ-1-КП-030',
                  'НУ-ПРИБ-1-КП-033',
@@ -384,12 +384,16 @@ def svod(request):
                                 'Количество выполненых КП', 'Количество выявленных ошибок', ], axis=1)
 
             # Получение имени файла без расширения
-            file_name = os.path.splitext(file.name)[0]
-            summary_df1['Количество контрольных процедур, не выявивших ошибки'] = summary_df1[
-                                                                                      'Количество выполненых КП'] - \
-                                                                                  summary_df1[
-                                                                                      'Количество выявленных ошибок']
 
+
+
+
+            df1['Количество контрольных процедур, не выявивших ошибки'] = df1.apply(lambda row: row['Количество выполненых КП'] - row['Количество выявленных ошибок'], axis=1)
+
+            file_name = os.path.splitext(file.name)[0]
+
+            # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
+            df1['Номер Чек-листа, подтверждающего проведение контрольной процедуры'] = file_name
             # Добавление столбика "Документ" в DataFrame и заполнение его названием файла
 
             df1.drop(['Способ подсчета результаты проведения КП', 'Описание КП', 'Переодичность проведения'], axis=1,
@@ -407,7 +411,7 @@ def svod(request):
 
 
             # Чтение второго листа файла и взятие только значений
-            df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=3, nrows=5)
+            df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=9, nrows=1000000)
             df2 = df2.set_axis(['№ п/п', 'Код КП(промежуточный)', 'Исполнитель ИП', 'номер чек листа',
                                             'Объект контроля (договор, акт, счет-фактура, КС-2 и др.)',
                                             'Дата документа', 'Номер документа', 'Количество документов/операций',
@@ -461,7 +465,7 @@ def svod(request):
         merged_df1 = merged_df1.groupby('Код КП(общий)').sum().reset_index()
         merged_df1['Документ, подтверждающий проведение контрольной процедуры'] = 'Чек-лист/Реестр объектов контроля'
 
-        merged_df1.insert(0, '№ п/п', range(1, 81))
+        merged_df1.insert(0, '№ п/п', range(1, 82))
 
         merged_df1['Наименование КП'] = [
             'Контроль полноты и корректности определения объектов налогообложения водным налогом',
@@ -544,6 +548,7 @@ def svod(request):
             'Контроль правильности квалификации операций в качестве капитального ремонта / реконструкции / модернизации / технического перевооружения',
             'Ручной контроль корректности и правомерности отражения расходов по оплате труда в налоговом учете',
             'Контроль отнесения расходов к непринимаемым и принимаемым на стадии приемки ПУД',
+            'Контроль правильности квалификации операций в качестве капитального ремонта / реконструкции / модернизации / технического перевооружения',
             'Контроль определения СПИ программного обеспечения',
             'Контроль корректности проводок по учету доходов и расходов прошлых лет',
             'Контроль корректности, правомерности и своевременности отражения расходов на освоение природных ресурсов',
@@ -557,6 +562,7 @@ def svod(request):
             'Контроль полноты и корректности определения объектов обложения страховыми взносами',
             'Контроль корректности расчета заработной платы специалистами Бухгалтерии для целей обложения страховыми взносами',
             'Контроль корректности определения базы для начисления страховых взносов',
+
             #
             'Контроль корректности и полноты определения объектов налогообложения по транспортному налогу',
             'Контроль корректности определения налоговой базы по транспортному налогу',
@@ -608,9 +614,9 @@ def svod(request):
             worksheet1.add_data_validation(data_validation)
             data_validation.add(worksheet1['D3'])
 
-            values2 = ['За Декабрь 2023г', 'За Январь 2023г', 'За Февраль 2023г', 'За Март 2023г', 'За Апрель 2023г', 'За Май 2023г',
-                      'За Июнь 2023г', 'За Июль 2023г', 'За Август 2023г', 'За Сентябрь 2023г',
-                      'За Октябрь 2023г', 'За Ноябрь 2023г',
+            values2 = ['Декабрь', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май',
+                      'Июнь', 'Июль', 'Август', 'Сентябрь',
+                      'Октябрь', 'Ноябрь',
                       ]
 
             # Создаем объект DataValidation
@@ -618,7 +624,15 @@ def svod(request):
 
             # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
             worksheet1.add_data_validation(data_validation)
-            data_validation.add(worksheet1['D7'])
+            data_validation.add(worksheet1['F8'])
+
+            values2 = ['2023', '2024', '2025', '2026', '2027',
+                       ]
+
+            # Создаем объект DataValidation
+            data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values2)))
+            worksheet1.add_data_validation(data_validation)
+            data_validation.add(worksheet1['G8'])
 
             # Запись значения по умолчанию в ячейку B2
 
@@ -663,19 +677,22 @@ def svod(request):
             worksheet1.cell(row=4, column=4).value = "наименование филиала/отдела)"
             worksheet1.cell(row=6, column=4).value = "осуществляемых в целях налогового мониторинга"
             worksheet1.cell(row=6, column=4).font = Font(bold=True)
-            worksheet1.cell(row=7, column=4).value = "________________________________"
+            worksheet1.cell(row=8, column=5).value = "                                              За"
+            worksheet1.cell(row=8, column=6).value = "Выберите месяц"
+            worksheet1.cell(row=8, column=7).value = "Выберите год"
+            worksheet1.cell(row=8, column=8).value = " "
 
 
 
-            #worksheet1.cell(row=table_end_row + 15, column=2).value = "________________________________"
-            #worksheet1.cell(row=table_end_row + 15, column=4).value = "________________________________"
-            #worksheet1.cell(row=table_end_row + 15, column=6).value = "________________________________"
+            worksheet1.cell(row=table_end_row + 17, column=2).value = "________________________________"
+            worksheet1.cell(row=table_end_row + 17, column=4).value = "________________________________"
+            worksheet1.cell(row=table_end_row + 17, column=6).value = "________________________________"
 
-            #worksheet1.cell(row=table_end_row + 16, column=2).value = "должность"
-            #worksheet1.cell(row=table_end_row + 16, column=4).value = "подпись"
-            #cell = worksheet1.cell(row=table_end_row + 16, column=6)
-            #cell.value = "ФИО"
-            #cell.alignment = Alignment(horizontal='left')
+            worksheet1.cell(row=table_end_row + 18, column=2).value = "должность"
+            worksheet1.cell(row=table_end_row + 18, column=4).value = "подпись"
+            cell = worksheet1.cell(row=table_end_row + 18, column=6)
+            cell.value = "ФИО"
+            cell.alignment = Alignment(horizontal='left')
 
 
             workbook.save("example.xlsx")
@@ -1160,13 +1177,13 @@ def download_excel(request, pk):
     worksheet1['I8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
 #    worksheet1.cell(row=9, column=10).value = checklist1.number_complete   =Sheet2!H24
-    worksheet1.cell(row=9, column=10).value = "=Sheet2!H24"
+    worksheet1.cell(row=9, column=10).value = "=Sheet2!H3006"
     worksheet1.merge_cells('J8')
     worksheet1['J8'] = 'Количество выполненных КП'
     worksheet1['J8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
 #    worksheet1.cell(row=9, column=11).value = checklist1.number_mistakes  =Sheet2!I24
-    worksheet1.cell(row=9, column=11).value = "=Sheet2!I24"
+    worksheet1.cell(row=9, column=11).value = "=Sheet2!I3006"
     worksheet1.merge_cells('K8')
     worksheet1['K8'] = 'Количество выявленных ошибок/ нарушений'
     worksheet1['K8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
@@ -1246,7 +1263,7 @@ def download_excel(request, pk):
     worksheet1.cell(row=7, column=7).value = "            2023г."
     worksheet1.cell(row=7, column=7).font = worksheet1.cell(row=7, column=7).font.copy(bold=True)
     worksheet1.cell(row=3, column=8).value = "Выберите филиал"
-    worksheet1.cell(row=1, column=1).value = f'=СЦЕПИТЬ(B9;I9;H14)'
+    worksheet1.cell(row=1, column=1).value = f'=F7&"_"&I9&"_"&C9'
 
 
 
@@ -1268,6 +1285,8 @@ def download_excel(request, pk):
 
 
     # Запись данных из базы данных в таблицу
+
+
     worksheet2.cell(row=4, column=1).value = checklist2.num
 
     worksheet2.cell(row=4, column=2).value = checklist2.cod_kp_inter
@@ -1276,6 +1295,8 @@ def download_excel(request, pk):
     #    worksheet['B3'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
     cell.alignment = Alignment(wrap_text=True)
     worksheet2.cell(row=4, column=3).value ="=Sheet!I9"
+    #worksheet2.cell(row=
+    # 5, column=4).value = "=Sheet!A1"
 
     worksheet2.cell(row=4, column=4).value = checklist2.chek_num
     worksheet2.cell(row=4, column=5).value = checklist2.obj_control
@@ -1283,17 +1304,42 @@ def download_excel(request, pk):
     worksheet2.cell(row=4, column=7).value = checklist2.num_document
     worksheet2.cell(row=4, column=8).value = checklist2.colvo_doc
 
+    last_row1 = worksheet2.max_row
+    sum_formula1 = "Итого"
+    worksheet2.cell(row=3000, column=7).value = sum_formula1
+    worksheet2.cell(row=4, column=9).value = checklist2.colvo_errors
 
     last_row1 = worksheet2.max_row
-    sum_formula1 = f"=SUM(H1:H23)"
-    worksheet2.cell(row=last_row1 + 20, column=8).value = sum_formula1
+    sum_formula1 = f"=SUM(H10:H3005)"
+    worksheet2.cell(row= 3000, column=8).value = sum_formula1
     worksheet2.cell(row=4, column=9).value = checklist2.colvo_errors
 
     # Задаем формулу суммирования
     last_row = worksheet2.max_row
-    sum_formula = f"=SUM(I1:I23)"
-    worksheet2.cell(row=last_row , column=9).value = sum_formula
+    sum_formula = f"=SUM(I10:I3005)"
+    worksheet2.cell(row=3000, column=9).value = sum_formula
     worksheet2.cell(row=4, column=8).value = checklist2.notes
+
+    last_row1 = worksheet2.max_row
+    sum_formula1 = f"=SUM(H10:H3005)"
+    worksheet2.cell(row=2, column=8).value = sum_formula1
+
+    last_row1 = worksheet2.max_row
+    sum_formula1 = f"=SUM(I10:I3005)"
+    worksheet2.cell(row=2, column=9).value = sum_formula1
+
+    last_row1 = worksheet2.max_row
+    sum_formula1 = "Итого"
+    worksheet2.cell(row=2, column=7).value = sum_formula1
+
+
+
+
+
+
+
+
+
 
 
     total_errors = 0  # Инициализация переменной для суммирования ошибок
@@ -1325,15 +1371,18 @@ def download_excel(request, pk):
             for cell in column:
                 cell.border = border_style
 
+    worksheet2.insert_rows(1, 6)
     # Установка значений для "Должность" и "Подпись"
-    worksheet2.cell(row=2, column=5).value = "                      Реестр обьектов контроля"
-    worksheet2.cell(row=2, column=5).font = worksheet2.cell(row=2, column=5).font.copy(bold=True)
-    worksheet2.cell(row=28, column=2).value = "_________________________"
-    worksheet2.cell(row=29, column=2).value = "               (должность)"
+    worksheet2.cell(row=7, column=5).value = "                      Реестр объектов контроля"
+    worksheet2.cell(row=7, column=5).font = worksheet2.cell(row=2, column=5).font.copy(bold=True)
+    worksheet2.cell(row=4, column=2).value = "________________________"
+    worksheet2.cell(row=5, column=2).value = "               (должность)"
     #worksheet2.cell(row=28, column=4).value = "_______________________"
     #worksheet2.cell(row=29, column=4).value = "               (ФИО)"
-    worksheet2.cell(row=28, column=6).value = "_________________"
-    worksheet2.cell(row=29, column=6).value = "         (подпись)"
+    worksheet2.cell(row=4, column=6).value = "_________________"
+    worksheet2.cell(row=5, column=6).value = "         (подпись)"
+    worksheet2.cell(row=1, column=1).value = "Дата"
+    worksheet2.cell(row=10, column=4).value = f'=Sheet!F7 &"_"& Sheet!I9&"_"&Sheet!C9'
 
 
 
@@ -1441,7 +1490,7 @@ def download_excel1(request, pk):
 
 
     # Установка значений для "Должность" и "Подпись"
-    worksheet.cell(row=2, column=5).value = "                      Реестр обьектов контроля"
+    worksheet.cell(row=2, column=5).value = "                      Реестр объектов  контроля"
     worksheet.cell(row=2, column=5).font = worksheet.cell(row=2, column=5).font.copy(bold=True)
     worksheet.cell(row=28, column=2).value = "_________________________"
     worksheet.cell(row=29, column=2).value = "               (должность)"
@@ -1651,17 +1700,11 @@ def svod2(request):
 
 
 
-            values = ['АУП', 'Югорское УМТС и К', 'УОВОФ', 'Надымское УАВР', 'Югорское УАВР', 'Белоярское УАВР',
-                      'Надымское УТТиСТ', 'Югорское УТТиСТ', 'Белоярское УТТиСТ', 'ИТЦ',
-                      'Учебно-производственный центр', 'УЭЗ и С', 'Управление связи', 'Бобровское ЛПУ',
-                      'Верхнеказымское ЛПУ', 'Ивдельское ЛПУ', 'Казымское ЛПУ',
-                      'Карпинское ЛПУ', 'Комсомольское ЛПУ', 'Краснотурьинское ЛПУ',
-                      'Лонг-Юганское ЛПУ', 'Надымское ЛПУ', 'Нижнетуринское ЛПУ', 'Ново-Уренгойское ЛПУ',
-                      'Ныдинское ЛПУ', 'Октябрьское ЛПУ', 'Пангодинское ЛПУ'
-                      'Пелымское ЛПУ', 'Перегребненское ЛПУ', 'Правохеттинское ЛПУ', 'Приозерное ЛПУ',
-                      'Пунгинское ЛПУ', 'Сорумское ЛПУ', 'Сосновское ЛПУ',
-                      'Таежное ЛПУ', 'Уральское ЛПУ', 'Ягельное ЛПУ', 'Ямбургское ЛПУ', 'Санаторий-профилакторий', 'КСК Норд'
-                      ]
+            values = ['За 1 квартал 2023', 'За 2 квартал 2023', 'За 3 квартал 2023', 'За 4 квартал 2023', 'За 1 квартал 2024',
+            'За 2 квартал 2024',
+            'За 3 квартал 2024', 'За 4 квартал 2023', 'За 1 квартал 2025', 'За 2 квартал 2025',
+            'За 3 квартал 2025', 'За 4 квартал 2025',
+            ]
 
             # Создаем объект DataValidation
             data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values)))
@@ -1670,17 +1713,18 @@ def svod2(request):
             worksheet1.add_data_validation(data_validation)
             data_validation.add(worksheet1['D3'])
 
-            values2 = ['За Декабрь 2023г', 'За Январь 2023г', 'За Февраль 2023г', 'За Март 2023г', 'За Апрель 2023г', 'За Май 2023г',
-                      'За Июнь 2023г', 'За Июль 2023г', 'За Август 2023г', 'За Сентябрь 2023г',
-                      'За Октябрь 2023г', 'За Ноябрь 2023г',
-                      ]
 
-            # Создаем объект DataValidation
-            data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values2)))
+            worksheet4.add_data_validation(data_validation)
+            data_validation.add(worksheet4['D8'])
 
-            # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
-            worksheet1.add_data_validation(data_validation)
-            data_validation.add(worksheet1['D7'])
+            values23 = ['За 1 квартал 2023', 'За 2 квартал 2023', 'За 3 квартал 2023', 'За 4 квартал 2023', 'За 1 квартал 2024',
+            'За 2 квартал 2024',
+            'За 3 квартал 2024', 'За 4 квартал 2023', 'За 1 квартал 2025', 'За 2 квартал 2025',
+            'За 3 квартал 2025', 'За 4 квартал 2025',
+            ]
+
+# Создаем объект DataValidation
+            data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values23)))
 
             # Запись значения по умолчанию в ячейку B2
 
@@ -1722,311 +1766,37 @@ def svod2(request):
             #################################################################################33
 
 
-            worksheet3 = writer.sheets['Sheet3']
-            # После удаления столбка 4, столбок 6 станет столбком 7
-            last_row = worksheet3.max_row
-            sum_formula = "Итого:"
-            worksheet3.cell(row=last_row + 1, column=2).value = sum_formula
+            
 
-            last_row1 = worksheet3.max_row
-            sum_formula1 = f"=SUM(C1:C{last_row})"
-            worksheet3.cell(row=last_row1 + 0, column=3).value = sum_formula1
+#            last_row2 = worksheet3.max_row
+#            sum_formula1 = f"=SUM(BW1:BW{last_row})"
+#            worksheet3.cell(row=last_row2 + 0, column=75).value = sum_formula1
+#
+#            last_row2 = worksheet3.max_row
+#            sum_formula1 = f"=SUM(BX1:BX{last_row})"
+#            worksheet3.cell(row=last_row2 + 0, column=76).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(D1:D{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=4).value = sum_formula1
+#            last_row2 = worksheet3.max_row
+#            sum_formula1 = f"=SUM(BY1:BY{last_row})"
+#            worksheet3.cell(row=last_row2 + 0, column=77).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(E1:E{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=5).value = sum_formula1
+            worksheet4.insert_rows(1, 10)
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(F1:F{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=6).value = sum_formula1
+            worksheet4.cell(row=1, column=4).value = "                      Реестр контрольных процедур"
+            worksheet4.cell(row=1, column=4).font = worksheet4.cell(row=2, column=5).font.copy(bold=True)
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(G1:G{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=7).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(H1:H{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=8).value = sum_formula1
+            worksheet4.cell(row=6, column=4).value = "Осуществляемых в целях налогового мониторинга"
+            #worksheet2.cell(row=6, column=4).value = "осуществляемых в целях налогового мониторинга"
+            worksheet4.cell(row=8, column=3).value = "За"
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(I1:I{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=9).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(J1:J{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=10).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(K1:K{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=11).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(L1:L{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=12).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(M1:M{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=13).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(N1:N{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=14).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(O1:O{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=15).value = sum_formula1
 
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(P1:P{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=16).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(Q1:Q{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=17).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(R1:R{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=18).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(S1:S{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=19).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(T1:T{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=20).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(U1:U{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=21).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(V1:V{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=22).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(W1:W{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=23).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(X1:X{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=24).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(Y1:Y{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=25).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(Z1:Z{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=26).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AA1:AA{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=27).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AB1:AB{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=28).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AC1:AC{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=29).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AD1:AD{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=30).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AE1:AE{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=31).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AF1:AF{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=32).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AG1:AG{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=33).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AH1:AH{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=34).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AI1:AI{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=35).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AJ1:AJ{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=36).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AK1:AK{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=37).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AL1:AL{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=38).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AM1:AM{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=39).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AN1:AN{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=40).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AO1:AO{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=41).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AP1:AP{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=42).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AQ1:AQ{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=43).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AR1:AR{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=44).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AS1:AS{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=45).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AT1:AT{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=46).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AU1:AU{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=47).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AV1:AV{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=48).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AW1:AW{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=49).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AX1:AX{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=50).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AY1:AY{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=51).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(AZ1:AZ{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=52).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BA1:BA{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=53).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BB1:BB{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=54).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BC1:BC{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=55).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BD1:BD{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=56).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BE1:BE{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=57).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BF1:BF{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=58).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BG1:BG{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=59).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BH1:BH{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=60).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BI1:BI{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=61).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BJ1:BJ{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=62).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BK1:BK{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=63).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BL1:BL{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=64).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BM1:BM{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=65).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BN1:BN{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=66).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BO1:BO{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=67).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BP1:BP{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=68).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BQ1:BQ{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=69).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BR1:BR{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=70).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BS1:BS{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=71).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BT1:BT{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=72).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BU1:BU{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=73).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BV1:BV{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=74).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BW1:BW{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=75).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BX1:BX{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=76).value = sum_formula1
-
-            last_row2 = worksheet3.max_row
-            sum_formula1 = f"=SUM(BY1:BY{last_row})"
-            worksheet3.cell(row=last_row2 + 0, column=77).value = sum_formula1
 
             #last_row2 = worksheet3.max_row
             #sum_formula1 = f"=SUM(BZ1:BZ{last_row})"
@@ -2107,20 +1877,20 @@ def svod2(request):
 
 
 
-#            for row in range(worksheet1.max_row, 0, -1):
-#                max_length = 20
-#                for cell in worksheet1[row]:
-#                    if len(str(cell.value)) > max_length:
-#                        max_length = len(str(cell.value))
-#                worksheet1.row_dimensions[row].height = max_length
+            for row in range(worksheet4.max_row, 0, -1):
+                max_length = 20
+                for cell in worksheet4[row]:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                worksheet4.row_dimensions[row].height = max_length
 
-#                for column_cells in worksheet1.columns:
-#                    length = max(len(str(cell.value)) for cell in column_cells)
-#                    worksheet1.column_dimensions[column_cells[0].column_letter].width = length
+                for column_cells in worksheet4.columns:
+                    length = max(len(str(cell.value)) for cell in column_cells)
+                    worksheet4.column_dimensions[column_cells[0].column_letter].width = length
 
                 # Установка выравнивания для каждой ячейки в строке
-#                for cell in worksheet1[row]:
-#                    cell.alignment = Alignment( vertical='center', wrap_text=True)
+                for cell in worksheet4[row]:
+                    cell.alignment = Alignment( vertical='center', wrap_text=True)
             # Опускание таблицы на 12 строк ниже начиная с первой строки
 
                     # Установка выравнивания для каждой ячейки в строке
@@ -2175,20 +1945,14 @@ def missing_data(request):
                    'НУ-ПРИБ-1-КП-010', 'НУ-ПРИБ-1-КП-011', 'НУ-ПРИБ-1-КП-013', 'НУ-ПРИБ-1-КП-014', 'НУ-ПРИБ-1-КП-015',
                   ]
         # Список всех филиалов
-        филиалы = ['АУП', 'Югорское УМТС и К', 'УОВОФ', 'Надымское УАВР', 'Югорское УАВР', 'Белоярское УАВР',
-                           'Надымское УТТиСТ', 'Югорское УТТиСТ', 'Белоярское УТТиСТ', 'ИТЦ',
-                           'Учебно-производственный центр', 'УЭЗ и С', 'Управление связи', 'Бобровское ЛПУ',
-                           'Верхнеказымское ЛПУ', 'Ивдельское ЛПУ', 'Казымское ЛПУ', 'Карпинское ЛПУ',
-                           'Комсомольское ЛПУ', 'Краснотурьинское ЛПУ', 'Лонг-Юганское ЛПУ', 'Надымское ЛПУ',
+        филиалы = ['24', '21', '32'
                           ]
         # Шаг 2: Проверить наличие каждого кода КП и каждого филиала в таблице
         отсутствующие_коды_кп = []
         отсутствующие_филиалы = []
-        for код_кп in коды_кп:
-            if код_кп not in df['Код КП(общий)', ].tolist():
-                отсутствующие_коды_кп.append(код_кп)
+
         for филиал in филиалы:
-            if филиал not in df['Филиал'].tolist():
+            if филиал not in df['Код БС'].tolist():
                 отсутствующие_филиалы.append(филиал)
 
         # Шаг 3: Сохранить отсутствующие коды КП и филиалы в файл Excel
