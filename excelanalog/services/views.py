@@ -70,7 +70,7 @@ def svod(request):
             columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование КП', 'Описание КП',
                      'Переодичность проведения', 'Способ подсчета результаты проведения КП',
                      'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
-                     'Количество выполненых КП', 'Количество выявленных ошибок'])
+                     'Количество выполненных КП', 'Количество выявленных ошибок'])
 
         # Создание пустого сводного DataFrame для второго листа
         summary_df2 = pd.DataFrame(columns=['№ п/п', 'Код КП(промежуточный)', 'Исполнитель ИП', 'номер чек листа',
@@ -381,14 +381,14 @@ def svod(request):
             df1 = df1.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование КП', 'Описание КП',
                                 'Переодичность проведения', 'Способ подсчета результаты проведения КП',
                                 'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
-                                'Количество выполненых КП', 'Количество выявленных ошибок', ], axis=1)
+                                'Количество выполненных КП', 'Количество выявленных ошибок', ], axis=1)
 
             # Получение имени файла без расширения
 
 
 
 
-            df1['Количество контрольных процедур, не выявивших ошибки'] = df1.apply(lambda row: row['Количество выполненых КП'] - row['Количество выявленных ошибок'], axis=1)
+            df1['Количество контрольных процедур, не выявивших ошибки'] = df1.apply(lambda row: row['Количество выполненных КП'] - row['Количество выявленных ошибок'], axis=1)
 
             file_name = os.path.splitext(file.name)[0]
 
@@ -411,7 +411,7 @@ def svod(request):
 
 
             # Чтение второго листа файла и взятие только значений
-            df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=9, nrows=1000000)
+            df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=9, nrows=1000)
             df2 = df2.set_axis(['№ п/п', 'Код КП(промежуточный)', 'Исполнитель ИП', 'номер чек листа',
                                             'Объект контроля (договор, акт, счет-фактура, КС-2 и др.)',
                                             'Дата документа', 'Номер документа', 'Количество документов/операций',
@@ -433,9 +433,9 @@ def svod(request):
 
 
         merged_df = pd.merge(summary_df3, summary_df1[
-            ['Код КП(общий)', 'Количество выполненых КП', 'Количество выявленных ошибок',]], on='Код КП(общий)',
+            ['Код КП(общий)', 'Количество выполненных КП', 'Количество выявленных ошибок',]], on='Код КП(общий)',
                              how='left')
-        merged_df['Количество выполненых КП'] = merged_df['Количество выполненых КП'].fillna(0)
+        merged_df['Количество выполненных КП'] = merged_df['Количество выполненных КП'].fillna(0)
         merged_df['Количество выявленных ошибок'] = merged_df['Количество выявленных ошибок'].fillna(0)
 
 
@@ -443,7 +443,7 @@ def svod(request):
         merged_df['филиал'] = ''
 
         merged_df = merged_df.set_index('Код КП(общий)').transpose()
-        merged_df.insert(0, 'Количество', ['Количество выполненых КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки (отклонения, нарушения)'])
+        merged_df.insert(0, 'Количество', ['Количество выполненных КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки (отклонения, нарушения)'])
 
 
         merged_df.insert(0, 'Код БС', '')
@@ -452,13 +452,13 @@ def svod(request):
 
         ################################################
         merged_df1 = pd.merge(summary_df4, summary_df1[
-            ['Код КП(общий)', 'Количество выполненых КП', 'Количество выявленных ошибок', ]], on='Код КП(общий)',
+            ['Код КП(общий)', 'Количество выполненных КП', 'Количество выявленных ошибок', ]], on='Код КП(общий)',
                              how='left')
-        merged_df1['Количество выполненых КП'] = merged_df1['Количество выполненых КП'].fillna(0)
+        merged_df1['Количество выполненных КП'] = merged_df1['Количество выполненных КП'].fillna(0)
         merged_df1['Количество выявленных ошибок'] = merged_df1['Количество выявленных ошибок'].fillna(0)
 
         merged_df1['Количество контрольных процедур, не выявивших ошибки'] = merged_df1[
-                                                                                  'Количество выполненых КП'] - \
+                                                                                  'Количество выполненных КП'] - \
                                                                               merged_df1[
                                                                                   'Количество выявленных ошибок']
 
@@ -690,6 +690,7 @@ def svod(request):
 
             worksheet1.cell(row=table_end_row + 18, column=2).value = "должность"
             worksheet1.cell(row=table_end_row + 18, column=4).value = "подпись"
+            worksheet1.cell(row=table_end_row + 18, column=1).value = "дата"
             cell = worksheet1.cell(row=table_end_row + 18, column=6)
             cell.value = "ФИО"
             cell.alignment = Alignment(horizontal='left')
@@ -1096,7 +1097,7 @@ def download_excel(request, pk):
 
     # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
     worksheet1.add_data_validation(data_validation)
-    data_validation.add(worksheet1['H3'])
+    #data_validation.add(worksheet1['H3'])
 
     values2 = ['Декабрь', 'Январь', 'Февраль', 'Март', 'Апрель',
                'Май',
@@ -1262,7 +1263,7 @@ def download_excel(request, pk):
     worksheet1.cell(row=7, column=6).font = worksheet1.cell(row=7, column=6).font.copy(bold=True)
     worksheet1.cell(row=7, column=7).value = "            2023г."
     worksheet1.cell(row=7, column=7).font = worksheet1.cell(row=7, column=7).font.copy(bold=True)
-    worksheet1.cell(row=3, column=8).value = "Выберите филиал"
+    worksheet1.cell(row=3, column=8).value = "Указать наименование филиала"
     worksheet1.cell(row=1, column=1).value = f'=F7&"_"&I9&"_"&C9'
 
 
@@ -1557,7 +1558,7 @@ def svod2(request):
 'НУ-СВ-1-КП-001', 'НУ-СВ-1-КП-002', 'НУ-СВ-1-КП-003', 'Итого'])
 
         summary_df4 = pd.DataFrame(
-            columns=['№ п/п', 'Код КП(общий)', 'Количество выполненых КП', 'Количество выявленных ошибок', 'Документ, подтверждающий проведение контрольной процедуры', 'Наименование КП'])
+            columns=['№ п/п', 'Код КП(общий)', 'Количество выполненных КП', 'Количество выявленных ошибок', 'Документ, подтверждающий проведение контрольной процедуры', 'Наименование КП'])
 
 
 
@@ -1649,17 +1650,17 @@ def svod2(request):
 
 
             df4 = pd.read_excel(file, sheet_name='Sheet4', usecols="A:G", header=None, skiprows=1, nrows=10000)
-            df4 = df4.set_axis(['№ п/п', 'Код КП(общий)', 'Количество выполненых КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки' ,'Документ, подтверждающий проведение контрольной процедуры', 'Наименование КП'
+            df4 = df4.set_axis(['№ п/п', 'Код КП(общий)', 'Количество выполненных КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки' ,'Документ, подтверждающий проведение контрольной процедуры', 'Наименование КП'
 
                                 ], axis=1)
 
             summary_df4 = pd.concat([summary_df4, df4], ignore_index=True)
             summary_df4 = summary_df4.groupby(['№ п/п', 'Наименование КП', 'Код КП(общий)', ]).agg(
-                {'Количество выполненых КП': 'sum', 'Количество выявленных ошибок': 'sum'}).reset_index()
+                {'Количество выполненных КП': 'sum', 'Количество выявленных ошибок': 'sum'}).reset_index()
 
 
             summary_df4['Количество контрольных процедур, не выявивших ошибки'] = summary_df4[
-                                                                                     'Количество выполненых КП'] - \
+                                                                                     'Количество выполненных КП'] - \
                                                                                  summary_df4[
                                                                                      'Количество выявленных ошибок']
 
@@ -1719,7 +1720,7 @@ def svod2(request):
 
             values23 = ['За 1 квартал 2023', 'За 2 квартал 2023', 'За 3 квартал 2023', 'За 4 квартал 2023', 'За 1 квартал 2024',
             'За 2 квартал 2024',
-            'За 3 квартал 2024', 'За 4 квартал 2023', 'За 1 квартал 2025', 'За 2 квартал 2025',
+            'За 3 квартал 2024', 'За 4 квартал 2024', 'За 1 квартал 2025', 'За 2 квартал 2025',
             'За 3 квартал 2025', 'За 4 квартал 2025',
             ]
 
@@ -1753,24 +1754,41 @@ def svod2(request):
             worksheet4.cell(row=last_row + 1, column=3).value = sum_formula
 
             last_row1 = worksheet4.max_row
-            sum_formula1 = f"=SUM(D1:D{last_row})"
+            sum_formula1 = f"=SUM(D1:D92)"
             worksheet4.cell(row=last_row1 + 0, column=4).value = sum_formula1
 
             last_row2 = worksheet4.max_row
-            sum_formula1 = f"=SUM(E1:E{last_row})"
+            sum_formula1 = f"=SUM(E1:E92)"
             worksheet4.cell(row=last_row2 + 0, column=5).value = sum_formula1
 
             last_row2 = worksheet4.max_row
-            sum_formula1 = f"=SUM(F1:F{last_row})"
+            sum_formula1 = f"=SUM(F1:F92)"
             worksheet4.cell(row=last_row2 + 0, column=6).value = sum_formula1
+
+
             #################################################################################33
 
 
-            
+            worksheet3.insert_rows(1, 8)
 
 #            last_row2 = worksheet3.max_row
+            worksheet3.cell(row=1, column=1).value = "Итого(Общее)"
 #            sum_formula1 = f"=SUM(BW1:BW{last_row})"
 #            worksheet3.cell(row=last_row2 + 0, column=75).value = sum_formula1
+            worksheet3.cell(row=2, column=2).value = "=Sheet4!D93"
+            worksheet3.merge_cells('CA1')
+#            worksheet3['СA'] = 'Количество выполненных КП'
+            worksheet3.cell(row=3, column=2).value = "=Sheet4!E93"
+            worksheet3.merge_cells('CA1')
+
+            worksheet3.cell(row=4, column=2).value = "=Sheet4!F93"
+            worksheet3.merge_cells('CA1')
+
+            worksheet3.cell(row=2, column=1).value = "Количество выполненных КП"
+            worksheet3.cell(row=3, column=1).value = "Количество выявленных ошибок"
+            worksheet3.cell(row=4, column=1).value = "Количество контрольных процедур, не выявивших ошибки (отклонения, нарушения)"
+
+
 #
 #            last_row2 = worksheet3.max_row
 #            sum_formula1 = f"=SUM(BX1:BX{last_row})"
@@ -1786,9 +1804,11 @@ def svod2(request):
             worksheet4.cell(row=1, column=4).font = worksheet4.cell(row=2, column=5).font.copy(bold=True)
 
 
+
             worksheet4.cell(row=6, column=4).value = "Осуществляемых в целях налогового мониторинга"
+            worksheet4.cell(row=8, column=4).value = "Выбрать отчетный период"
             #worksheet2.cell(row=6, column=4).value = "осуществляемых в целях налогового мониторинга"
-            worksheet4.cell(row=8, column=3).value = "За"
+
 
 
 
