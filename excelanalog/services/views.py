@@ -871,6 +871,12 @@ def svod(request):
             sum_formula1 = f"=SUM(D11:CC11)"
             worksheet3.cell(row=11, column=82).value = sum_formula1
 
+            yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="lightGrid")
+
+            worksheet3['A9'].fill = yellow_fill
+            worksheet3['A10'].fill = yellow_fill
+            worksheet3['A11'].fill = yellow_fill
+
             # last_row2 = worksheet3.max_row
             # sum_formula1 = f"=SUM(D3:CD3)"
             # worksheet3.cell(row=3, column=3).value = sum_formula1
@@ -1134,7 +1140,7 @@ def download_excel(request, pk):
 
     worksheet1.cell(row=9, column=1).value = checklist1.number
     worksheet1.merge_cells('A8')
-    worksheet1['A8'] = 'номер п/п'
+    worksheet1['A8'] = 'Номер по порядку'
     worksheet1['A8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
     worksheet1.cell(row=9, column=2).value = checklist1.cod_kp_overall
