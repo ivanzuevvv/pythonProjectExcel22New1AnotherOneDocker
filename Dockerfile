@@ -1,25 +1,14 @@
-# Используйте официальный образ Python в качестве базового образа
-FROM python:3.9
+FROM python:3.9-slim
 
-# Установка Nginx
-RUN apt-get update && apt-get install -y nginx
+WORKDIR /excelnalog
 
-# Копирование файлов конфигурации Nginx в контейнер
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY default.conf /etc/nginx/conf.d/default.conf
+RUN apt-get update
 
-# Открытие порта 80 для входящих соединений
-EXPOSE 80
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# Копирование файлов проекта и установка зависимостей Python
-COPY excelanalog/requirements.txt /temp/requirements.txt
-COPY excelanalog /excelanalog
-WORKDIR /excelanalog
+RUN pip install --upgrade pip
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-# Запуск Nginx и Python-приложения
-CMD service nginx start && python manage.py runserver 0.0.0.0:8000
-
-
-
-
+COPY . .

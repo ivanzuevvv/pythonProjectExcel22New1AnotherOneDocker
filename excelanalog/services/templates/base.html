@@ -4,16 +4,21 @@
 <head>
  <title>{% block title %}{% endblock %}</title>
  <!-- подключение стилей и скриптов -->
- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+ <link rel="stylesheet" href="{% static 'bootstrap/bootstrap.min.css' %}">
+ <script src="{% static 'bootstrap/bootstrap.min.js' %}"></script>
 
 
+ <script src="{% static 'bootstrap/jquery-3.3.1.slim.min.js.js' %}"></script>
+
+ <script src="{% static 'bootstrap/bootstrap.min.js.js' %}"></script>
 
 
+
+
+
+
+
+{% static 'bootstrap/
 
 
 
@@ -38,12 +43,12 @@
 
 </style>
 
-<a href="{% url 'index' %}" style="pointer-events: none;">
+
 
   <img src="{% static 'services/images/logo.jpg' %}" height="20" width="20" alt="Логотип" class="mr-3 ml-3">
   <div class="d-flex flex-column align-items-start">
-    <span class="text-white"></span>
-    <small class="text-white"></small>
+    <span class="text-white">АИС Повышение надежности систем автоматизации</span>
+    <small class="text-white">Отдел АСУТП САиМО ИТЦ</small>
   </div>
 </a>
 
@@ -61,11 +66,12 @@
       <li class="nav-item dropdown">
         <ul class="navbar-nav nav-fill">
 
-      <li class="nav-item {% if current_page == 'index' %}active{% endif %}">
+       <li class="nav-item {% if current_page == 'index' %}active{% endif %}">
         <a class="nav-link" href="{% url 'base' %}">Чек-листы </a>
            <a class="nav-link" href="{% url 'upload' %}">Проверка Чек-листов</a>
           <a class="nav-link" href="{% url 'svod' %}">Свод филиалов</a>
           <a class="nav-link" href="{% url 'svod2' %}">Отчет</a>
+           <a class="nav-link" href="{% url 'missing_data' %}">Проверка Отчета</a>
 
       </li>
         </div>

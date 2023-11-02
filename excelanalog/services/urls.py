@@ -17,6 +17,6 @@ urlpatterns = [
     path('upload/', upload_file, name='upload'),
 
     path('missing_data/', missing_data, name='missing_data'),
-
+    path('svod_cheklistov/', svod_cheklistov, name='svod_cheklistov'),
 
 ]

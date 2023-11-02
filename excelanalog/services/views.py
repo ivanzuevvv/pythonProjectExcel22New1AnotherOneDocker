@@ -20,6 +20,72 @@ from openpyxl.styles import PatternFill
 def index(request):
     return render(request, 'base.html')
 
+def svod_cheklistov(request):
+    if request.method == 'POST':
+        files = request.FILES.getlist('files')  # Получение списка загруженных файлов
+
+        # Создание пустого сводного DataFrame для первого листа
+        summary_df1 = pd.DataFrame(
+            columns=['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование КП', 'Описание КП',
+                     'Переодичность проведения', 'Способ подсчета результаты проведения КП',
+                     'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                     'Количество выполненных КП', 'Количество выявленных ошибок'])
+
+        # Создание пустого сводного DataFrame для второго листа
+        summary_df2 = pd.DataFrame(
+            columns=['№ п/п чек-листа', 'Код КП(промежуточный)', 'Исполнитель КП', 'номер чек листа',
+                     'Объект контроля (договор, акт, счет-фактура, КС-2 и др.)',
+                     'Дата документа', 'Номер документа', 'Количество документов/операций',
+                     'Количество ошибок/нарушений', 'Примечание'])
+
+        # Обработка каждого загруженного файла
+        for file in files:
+            # Чтение первого листа файла и взятие только значений
+            df1 = pd.read_excel(file, sheet_name='Sheet', usecols="A:K", header=None, skiprows=6, nrows=5)
+            df1 = df1.set_axis(['номер п/п', 'Код КП(общий)', 'Код КП(промежуточный)', 'Наименование КП', 'Описание КП',
+                                'Переодичность проведения', 'Способ подсчета результаты проведения КП',
+                                'Подразделение, ответственное за проведение контрольной процедуры', 'Исполнитель КП',
+                                'Количество выполненных КП', 'Количество выявленных ошибок', ], axis=1)
+
+            # Получение имени файла без расширения
+
+            summary_df1 = pd.concat([summary_df1, df1], ignore_index=True)
+
+            # summary_df1['филиал'] = 'Your Filial Value'
+            # summary_df1.fillna(method='ffill', inplace=True)
+            # summary_df1['филиал'] = summary_df1['филиал'].str.join('')
+
+            # Вставка нового столбца на 9-ую позицию
+
+            # Чтение второго листа файла и взятие только значений
+            df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=5, nrows=10)
+            df2 = df2.set_axis(['№ п/п чек-листа', 'Код КП(промежуточный)', 'Исполнитель КП', 'номер чек листа',
+                                'Объект контроля (договор, акт, счет-фактура, КС-2 и др.)',
+                                'Дата документа', 'Номер документа', 'Количество документов/операций',
+                                'Количество ошибок/нарушений', 'Примечание'], axis=1)
+
+            ########################################
+
+            # Создаем новый DataFrame с суммами
+
+            ##########################################
+
+            summary_df2 = pd.concat([summary_df2, df2], ignore_index=True)
+
+        with pd.ExcelWriter('summary.xlsx', engine='openpyxl') as writer:
+            summary_df1.to_excel(writer, sheet_name='Sheet', index=False)
+            summary_df2.to_excel(writer, sheet_name='Sheet2', index=False)
+
+
+        file_path = 'summary.xlsx'  # Путь к файлу
+        with open(file_path, 'rb') as file:
+            response = HttpResponse(file.read(),
+                                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename=summary.xlsx'
+            return response
+
+    return render(request, 'svod_cheklistov.html')  # Отображение шаблона "upload.html".
+
 
 def upload_file(request):
     if request.method == 'POST':
@@ -29,7 +95,7 @@ def upload_file(request):
         workbook = openpyxl.load_workbook(file)
         worksheet = workbook['Sheet2']  # Имя вашего второго листа
 
-        for row_num in range(10, 2000):
+        for row_num in range(10, 4600):
             if worksheet.cell(row=row_num, column=2).value:
                 for col_num in range(1, 8):
                     if not worksheet.cell(row=row_num, column=col_num).value:
@@ -63,7 +129,9 @@ def upload_file(request):
 
 def svod(request):
     if request.method == 'POST':
-        files = request.FILES.getlist('files')  # Получение списка загруженных файлов
+        files = request.FILES.getlist('files')
+
+        # Получение списка загруженных файлов
 
         # Создание пустого сводного DataFrame для первого листа
         summary_df1 = pd.DataFrame(
@@ -411,7 +479,7 @@ def svod(request):
 
 
             # Чтение второго листа файла и взятие только значений
-            df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=9, nrows=1000)
+            df2 = pd.read_excel(file, sheet_name='Sheet2', usecols="A:J", header=None, skiprows=9, nrows=4600)
             df2 = df2.set_axis(['№ п/п чек-листа', 'Код КП(промежуточный)', 'Исполнитель КП', 'номер чек листа',
                                             'Объект контроля (договор, акт, счет-фактура, КС-2 и др.)',
                                             'Дата документа', 'Номер документа', 'Количество документов/операций',
@@ -803,7 +871,7 @@ def svod(request):
             worksheet3['AA11'] = '=AA9-AA10'
             worksheet3['AB11'] = '=AB9-AB10'
             worksheet3['AC11'] = '=AC9-AC10'
-            worksheet3['AD11'] = '=ADB9-AD10'
+            worksheet3['AD11'] = '=AD9-AD10'
             worksheet3['AE11'] = '=AE9-AE10'
             worksheet3['AF11'] = '=AF9-AF10'
             worksheet3['AG11'] = '=AG9-AG10'
@@ -863,13 +931,13 @@ def svod(request):
             worksheet3.insert_cols(84)
             worksheet3.cell(row=8, column=84).value = "Итого"
 
-            sum_formula1 = f"=SUM(D9:CC9)"
+            sum_formula1 = f"=SUM(D9:CE9)"
             worksheet3.cell(row=9, column=84).value = sum_formula1
 
-            sum_formula1 = f"=SUM(D10:CC10)"
+            sum_formula1 = f"=SUM(D10:CE10)"
             worksheet3.cell(row=10, column=84).value = sum_formula1
 
-            sum_formula1 = f"=SUM(D11:CC11)"
+            sum_formula1 = f"=SUM(D11:CE11)"
             worksheet3.cell(row=11, column=84).value = sum_formula1
 
             yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="lightGrid")
@@ -948,7 +1016,13 @@ def svod(request):
             response['Content-Disposition'] = 'attachment; filename=summary.xlsx'
             return response
 
-    return render(request, 'svod.html')  # Отображение шаблона "upload.html".
+
+
+    return render(request, 'svod.html')
+
+
+
+    # Отображение шаблона "upload.html".
 
 
 def base(request):
@@ -1185,13 +1259,13 @@ def download_excel(request, pk):
     worksheet1['I8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
 #    worksheet1.cell(row=9, column=10).value = checklist1.number_complete   =Sheet2!H24
-    worksheet1.cell(row=9, column=10).value = "=Sheet2!H3006"
+    worksheet1.cell(row=9, column=10).value = "=Sheet2!H5012"
     worksheet1.merge_cells('J8')
     worksheet1['J8'] = 'Количество выполненных КП'
     worksheet1['J8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
 #    worksheet1.cell(row=9, column=11).value = checklist1.number_mistakes  =Sheet2!I24
-    worksheet1.cell(row=9, column=11).value = "=Sheet2!I3006"
+    worksheet1.cell(row=9, column=11).value = "=Sheet2!I5012"
     worksheet1.merge_cells('K8')
     worksheet1['K8'] = 'Количество выявленных ошибок/ нарушений'
     worksheet1['K8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
@@ -1314,26 +1388,26 @@ def download_excel(request, pk):
 
     last_row1 = worksheet2.max_row
     sum_formula1 = "Итого"
-    worksheet2.cell(row=3000, column=7).value = sum_formula1
+    worksheet2.cell(row=5000, column=7).value = sum_formula1
     worksheet2.cell(row=4, column=9).value = checklist2.colvo_errors
 
     last_row1 = worksheet2.max_row
-    sum_formula1 = f"=SUM(H10:H3005)"
-    worksheet2.cell(row= 3000, column=8).value = sum_formula1
+    sum_formula1 = f"=SUM(H10:H5006)"
+    worksheet2.cell(row=5006, column=8).value = sum_formula1
     worksheet2.cell(row=4, column=9).value = checklist2.colvo_errors
 
     # Задаем формулу суммирования
     last_row = worksheet2.max_row
-    sum_formula = f"=SUM(I10:I3005)"
-    worksheet2.cell(row=3000, column=9).value = sum_formula
+    sum_formula = f"=SUM(I10:I5006)"
+    worksheet2.cell(row=5006, column=9).value = sum_formula
     worksheet2.cell(row=4, column=8).value = checklist2.notes
 
     last_row1 = worksheet2.max_row
-    sum_formula1 = f"=SUM(H10:H3005)"
+    sum_formula1 = f"=SUM(H10:H5006)"
     worksheet2.cell(row=2, column=8).value = sum_formula1
 
     last_row1 = worksheet2.max_row
-    sum_formula1 = f"=SUM(I10:I3005)"
+    sum_formula1 = f"=SUM(I10:I5006)"
     worksheet2.cell(row=2, column=9).value = sum_formula1
 
     last_row1 = worksheet2.max_row
@@ -1399,6 +1473,8 @@ def download_excel(request, pk):
     workbook.save(response)
 
     return response
+
+
 
 
 
@@ -1676,7 +1752,7 @@ def svod2(request):
 
             ###############################################################################################################################
             # Чтение третьего листа файла и взятие только значений
-            df3 = pd.read_excel(file, sheet_name='Sheet3', usecols="A:CF", header=None, skiprows=8, nrows=10000)
+            df3 = pd.read_excel(file, sheet_name='Sheet3', usecols="A:CF", header=None, skiprows=8, nrows=100000)
             df3 = df3.set_axis(['Код БС', 'Количество', 'НУ-ВН-1-КП-0001',
                 'НУ-ВН-1-КП-002',
                   'НУ-ВН-1-КП-003',
@@ -1766,7 +1842,7 @@ def svod2(request):
             summary_df3 = pd.concat([summary_df3, df3], ignore_index=True)
 
 
-            df4 = pd.read_excel(file, sheet_name='Sheet4', usecols="A:G", header=None, skiprows=1, nrows=10000)
+            df4 = pd.read_excel(file, sheet_name='Sheet4', usecols="A:G", header=None, skiprows=1, nrows=1000000)
             df4 = df4.set_axis(['№ п/п', 'Код КП(общий)', 'Количество выполненных КП', 'Количество выявленных ошибок', 'Количество контрольных процедур, не выявивших ошибки' ,'Документ, подтверждающий проведение контрольной процедуры', 'Наименование КП'
 
                                 ], axis=1)
@@ -2070,18 +2146,17 @@ def missing_data(request):
         uploaded_file = request.FILES['file']
 
         # Шаг 1: Прочитать таблицу из файла
-        df = pd.read_excel(uploaded_file)
 
-        коды_кп = ['НУ-ОБЩ-1-КП-001', 'НУ-ОБЩ-1-КП-002', 'НУ-ОБЩ-1-КП-003', 'НУ-ОБЩ-1-КП-004', 'НУ-ОБЩ-1-КП-005',
-                   'НУ-ОБЩ-1-КП-006', 'НУ-ОБЩ-1-КП-007', 'НУ-ОБЩ-1-КП-008', 'НУ-ОБЩ-1-КП-009', 'НУ-ОБЩ-1-КП-010',
-                   'НУ-ОБЩ-1-КП-011', 'НУ-ПРИБ-1-КП-001', 'НУ-ПРИБ-1-КП-002', 'НУ-ПРИБ-1-КП-003', 'НУ-ПРИБ-1-КП-009',
-                   'НУ-ПРИБ-1-КП-010', 'НУ-ПРИБ-1-КП-011', 'НУ-ПРИБ-1-КП-013', 'НУ-ПРИБ-1-КП-014', 'НУ-ПРИБ-1-КП-015',
-                  ]
+        df = pd.read_excel(uploaded_file, skiprows=8)
+
+
         # Список всех филиалов
-        филиалы = ['24', '21', '32'
+        филиалы = [2410, 2411, 2412, 2414, 2416, 2417, 2418, 2420, 2421, 2422, 2424, 2425, 2426, 2427, 2430, 2431,
+                   2432, 2433, 2434, 2435, 2436, 2437, 2438, 2439, 2440, 2441, 2442, 2443, 2444, 2445, 2446, 2447, 2448, 2449,
+                   2450, 2451, 2452, 2453, 2454, 2455, 2470, 2471
                           ]
         # Шаг 2: Проверить наличие каждого кода КП и каждого филиала в таблице
-        отсутствующие_коды_кп = []
+
         отсутствующие_филиалы = []
 
         for филиал in филиалы:
@@ -2092,11 +2167,11 @@ def missing_data(request):
 
 
 
-        if len(отсутствующие_коды_кп) > 0 or len(отсутствующие_филиалы) > 0:
-            df_missing_kp_codes = pd.DataFrame({'Missing KP Codes': отсутствующие_коды_кп})
+        if  len(отсутствующие_филиалы) > 0:
+
             df_missing_branches = pd.DataFrame({'Missing Branches': отсутствующие_филиалы})
             with pd.ExcelWriter('missing_data.xlsx') as writer:
-                df_missing_kp_codes.to_excel(writer, sheet_name='Missing KP Codes', index=False)
+
                 df_missing_branches.to_excel(writer, sheet_name='Missing Branches', index=False)
 
             # Создаем объект HttpResponse с указанием типа содержимого файла и заголовков

@@ -1,17 +1,63 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Отсутствующие данные</title>
-</head>
-<body>
-    <h1>Отсутствующие данные</h1>
-    {% if message %}
-    <p>{{ message }}</p>
-    {% endif %}
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="file">
-        <button type="submit">Проверить данные</button>
-    </form>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 40vh;
+    }
+    h1 {
+        text-align: center;
+        font-weight: bold;
+        font-size: 35px;
+        margin-top: 110px;
+    }
+
+    .instructions {
+        text-align: center;
+        margin-top: -100px;
+        padding: 20px;
+        color: black;
+    }
+</style>
+
+<div class="h1">
+    <h1>Проверка отчетов</h1>
+</div>
+
+<div class="center">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            {% if message %}
+            <p class="text-center">{{ message }}</p>
+            {% endif %}
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="file">               </label>
+                    <input type="file" class="btn btn-primary" name="file" id="file" style="margin-left: 160px;">
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary mt-3">Проверить данные</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+    </div>
+<br> <!-- Add this line to move the content down -->
+
+<div class="center instructions">
+    <ol>
+        <li>Выберите файлы</li>
+        <li>Нажмите кнопку "Загрузить"</li>
+        <li>Перейдите в загруженные файлы и выберите сформировавшийся файл </li>
+    </ol>
+</div>
+
+{% endblock %}

@@ -1,12 +1,26 @@
+version: "3"
+
 services:
-  web-app:
+  web:
+    container_name: nalog_web
+    image: nalog_monitor
     build:
       context: .
-    ports:
-      - "8000:8000"
+      dockerfile: Dockerfile
+    command: sh -c "cd excelanalog && python manage.py collectstatic --no-input && gunicorn excelanalog.wsgi:application --bind 0.0.0.0:3000"
     volumes:
-      - ./excelanalog:/excelanalog
-
-
-    command:
-      sh -c "python manage.py runserver 0.0.0.0:8000"
+      - static_volume:/excelnalog/excelanalog/staticfiles
+    environment:
+      - DEBUG='False'
+  nginx:
+    container_name: nalog_nginx
+    image: nalog_nginx
+    build: ./nginx
+    volumes:
+      - static_volume:/staticfiles
+    ports:
+      - 80:80
+    depends_on:
+      - web
+volumes:
+  static_volume:

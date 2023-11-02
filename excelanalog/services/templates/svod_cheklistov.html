@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<style>
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 19vh;
+    }
+
+    h1 {
+        text-align: center;
+        font-weight: bold;
+        font-size: 30px;
+    }
+
+    .instructions {
+        text-align: center;
+        margin-top: 20px;
+        padding: 20px;
+        color: black;
+    }
+</style>
+
+<div class="center">
+    <h1>Свод чек-листов</h1>
+</div>
+
+<div class="center">
+    <form action="{% url 'svod_cheklistov' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="files" multiple class="btn btn-primary">
+        <button type="submit" class="btn btn-primary">Загрузить</button>
+    </form>
+</div>
+
+<div class="center instructions">
+    <ol>
+        <li>Выберите файлы</li>
+        <li>Нажмите кнопку "Загрузить"</li>
+        <li>Перейдите в загруженные файлы и выберите сформировавшийся файл </li>
+    </ol>
+</div>
+
+{% endblock %}
