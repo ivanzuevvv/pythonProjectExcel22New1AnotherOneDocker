@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: sh -c "cd excelanalog && python manage.py collectstatic --no-input && gunicorn excelanalog.wsgi:application --bind 0.0.0.0:3000"
+    command: sh -c "cd excelanalog && python manage.py collectstatic --no-input && gunicorn --timeout 6000 excelanalog.wsgi:application --bind 0.0.0.0:3000"
     volumes:
       - static_volume:/excelnalog/excelanalog/staticfiles
     environment:

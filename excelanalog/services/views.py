@@ -666,41 +666,8 @@ def svod(request):
 
 
 
-            values = ['АУП', 'Югорское УМТС и К', 'УОВОФ', 'Надымское УАВР', 'Югорское УАВР', 'Белоярское УАВР',
-                      'Надымское УТТиСТ', 'Югорское УТТиСТ', 'Белоярское УТТиСТ', 'ИТЦ',
-                      'Учебно-производственный центр', 'УЭЗ и С', 'Управление связи', 'Бобровское ЛПУ', 'Верхнеказымское ЛПУ', 'Ивдельское ЛПУ', 'Казымское ЛПУ',
-                      'Карпинское ЛПУ', 'Комсомольское ЛПУ', 'Краснотурьинское ЛПУ',
-                      'Лонг-Юганское ЛПУ', 'Надымское ЛПУ', 'Нижнетуринское ЛПУ', 'Ново-Уренгойское ЛПУ', 'Ныдинское ЛПУ', 'Октябрьское ЛПУ', 'Пангодинское ЛПУ'
-                      'Пелымское ЛПУ', 'Перегребненское ЛПУ', 'Правохеттинское ЛПУ', 'Приозерное ЛПУ', 'Пунгинское ЛПУ', 'Сорумское ЛПУ', 'Сосновское ЛПУ',
-                      'Таежное ЛПУ', 'Уральское ЛПУ', 'Ягельное ЛПУ', 'Ямбургское ЛПУ', 'Санаторий-профилакторий', 'КСК Норд'
-                      ]
 
-            # Создаем объект DataValidation
-            data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values)))
 
-            # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
-            worksheet1.add_data_validation(data_validation)
-            data_validation.add(worksheet1['D3'])
-
-            values2 = ['Декабрь', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май',
-                      'Июнь', 'Июль', 'Август', 'Сентябрь',
-                      'Октябрь', 'Ноябрь',
-                      ]
-
-            # Создаем объект DataValidation
-            data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values2)))
-
-            # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
-            worksheet1.add_data_validation(data_validation)
-            data_validation.add(worksheet1['F8'])
-
-            values2 = ['2023', '2024', '2025', '2026', '2027',
-                       ]
-
-            # Создаем объект DataValidation
-            data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values2)))
-            worksheet1.add_data_validation(data_validation)
-            data_validation.add(worksheet1['G8'])
 
             # Запись значения по умолчанию в ячейку B2
 
@@ -715,15 +682,15 @@ def svod(request):
 
 
             last_row = worksheet1.max_row
-            sum_formula = f"=SUM(G1:G{last_row})"
+            sum_formula = f"=SUM(G13:G{last_row})"
             worksheet1.cell(row=last_row + 1, column=7).value = sum_formula
 
             last_row1 = worksheet1.max_row
-            sum_formula1 = f"=SUM(H1:H{last_row})"
+            sum_formula1 = f"=SUM(H13:H{last_row})"
             worksheet1.cell(row=last_row1 + 0, column=8).value = sum_formula1
 
             last_row2 = worksheet1.max_row
-            sum_formula1 = f"=SUM(I1:I{last_row})"
+            sum_formula1 = f"=SUM(I13:I{last_row})"
             worksheet1.cell(row=last_row2 + 0, column=9).value = sum_formula1
 
             last_row3 = worksheet1.max_row
@@ -739,15 +706,15 @@ def svod(request):
             worksheet1.cell(row=1, column=4).font = Font(bold=True)
             worksheet1.cell(row=2, column=4).value = " "
             worksheet1.cell(row=3, column=4).value = "_____________________________________"
-            worksheet1.cell(row=3, column=4).value = "Выберите филиал"
+            worksheet1.cell(row=3, column=4).value = "Указать филиал"
             worksheet1.cell(row=3, column=4).font = Font(bold=True)
 
             worksheet1.cell(row=4, column=4).value = "наименование филиала/отдела)"
             worksheet1.cell(row=6, column=4).value = "осуществляемых в целях налогового мониторинга"
             worksheet1.cell(row=6, column=4).font = Font(bold=True)
             worksheet1.cell(row=8, column=5).value = "                                              За"
-            worksheet1.cell(row=8, column=6).value = "Выберите месяц"
-            worksheet1.cell(row=8, column=7).value = "Выберите год"
+            worksheet1.cell(row=8, column=6).value = "Указать месяц"
+            worksheet1.cell(row=8, column=7).value = "Указать год"
             worksheet1.cell(row=8, column=8).value = " "
 
 
@@ -931,13 +898,13 @@ def svod(request):
             worksheet3.insert_cols(84)
             worksheet3.cell(row=8, column=84).value = "Итого"
 
-            sum_formula1 = f"=SUM(D9:CE9)"
+            sum_formula1 = f"=SUM(C9:CE9)"
             worksheet3.cell(row=9, column=84).value = sum_formula1
 
-            sum_formula1 = f"=SUM(D10:CE10)"
+            sum_formula1 = f"=SUM(C10:CE10)"
             worksheet3.cell(row=10, column=84).value = sum_formula1
 
-            sum_formula1 = f"=SUM(D11:CE11)"
+            sum_formula1 = f"=SUM(C11:CE11)"
             worksheet3.cell(row=11, column=84).value = sum_formula1
 
             yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="lightGrid")
@@ -1937,21 +1904,21 @@ def svod2(request):
             #worksheet2.delete_cols(6)
 
             worksheet4 = writer.sheets['Sheet4']
-            # После удаления столбка 4, столбок 6 станет столбком 7
+            # После удаления столбка 4, столбоaк 6 станет столбком 7
             last_row = worksheet4.max_row
             sum_formula = "Итого:"
             worksheet4.cell(row=last_row + 1, column=3).value = sum_formula
 
             last_row1 = worksheet4.max_row
-            sum_formula1 = f"=SUM(D1:D92)"
+            sum_formula1 = f"=SUM(D11:D92)"
             worksheet4.cell(row=last_row1 + 0, column=4).value = sum_formula1
 
             last_row2 = worksheet4.max_row
-            sum_formula1 = f"=SUM(E1:E92)"
+            sum_formula1 = f"=SUM(E11:E92)"
             worksheet4.cell(row=last_row2 + 0, column=5).value = sum_formula1
 
             last_row2 = worksheet4.max_row
-            sum_formula1 = f"=SUM(F1:F92)"
+            sum_formula1 = f"=SUM(F11:F92)"
             worksheet4.cell(row=last_row2 + 0, column=6).value = sum_formula1
 
 
