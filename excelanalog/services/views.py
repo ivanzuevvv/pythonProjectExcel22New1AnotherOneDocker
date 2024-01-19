@@ -169,7 +169,7 @@ def svod(request):
 'НУ-ТН-1-КП-002', 'НУ-ТН-1-КП-005', 'НУ-ТН-1-КП-004',
 'НУ-ЗН-1-КП-001', 'НУ-ЗН-1-КП-002', 'НУ-ЗН-1-КП-003',
 'НУ-ЗН-1-КП-004', 'НУ-НДПИ-1-КП-001', 'НУ-НДПИ-1-КП-002',
-'НУ-НДПИ-1-КП-006', 'НУ-ВН-1-КП-0001', 'НУ-ВН-1-КП-002',
+'НУ-НДПИ-1-КП-006', 'НУ-ВН-1-КП-001', 'НУ-ВН-1-КП-002',
 'НУ-ВН-1-КП-003', 'НУ-НДФЛ-1-КП-001', 'НУ-НДФЛ-1-КП-003',
 'НУ-НДФЛ-1-КП-004', 'НУ-НДФЛ-1-КП-005', 'НУ-НДФЛ-1-КП-006',
 'НУ-СВ-1-КП-001', 'НУ-СВ-1-КП-002', 'НУ-СВ-1-КП-003',]
@@ -1126,7 +1126,6 @@ def download_excel(request, pk):
     worksheet1 = workbook.active
 
 
-
     # Задаем список значений для выпадающего списка
     values = ['АУП', 'Югорское УМТС и К', 'УОВОФ', 'Надымское УАВР', 'Югорское УАВР', 'Белоярское УАВР',
                       'Надымское УТТиСТ', 'Югорское УТТиСТ', 'Белоярское УТТиСТ', 'ИТЦ',
@@ -1293,11 +1292,11 @@ def download_excel(request, pk):
                 cell.border = border_style
 
     worksheet1.cell(row=20, column=1).value = "Дата:"
-    worksheet1.cell(row=14, column=2).value = "_____________________"
+    worksheet1.cell(row=14, column=2).value = "_________________"
     worksheet1.cell(row=15, column=2).value = "            (должность)"
-    worksheet1.cell(row=14, column=4).value = "_____________________"
+    worksheet1.cell(row=14, column=4).value = ""
     worksheet1.cell(row=15, column=4).value = "             (подпись)"
-    worksheet1.cell(row=14, column=6).value = "_____________________"
+    worksheet1.cell(row=14, column=6).value = "_________________"
     worksheet1.cell(row=15, column=6).value = "                (ФИО)"
     #worksheet1.cell(row=14, column=8).value = "______________________"
     #worksheet1.cell(row=15, column=8).value = "                (дата)"
@@ -1424,13 +1423,17 @@ def download_excel(request, pk):
     # Установка значений для "Должность" и "Подпись"
     worksheet2.cell(row=7, column=5).value = "                      Реестр объектов контроля"
     worksheet2.cell(row=7, column=5).font = worksheet2.cell(row=2, column=5).font.copy(bold=True)
-    worksheet2.cell(row=4, column=2).value = "________________________"
+    worksheet2.cell(row=4, column=2).value = "=Sheet!B14"
     worksheet2.cell(row=5, column=2).value = "               (должность)"
     #worksheet2.cell(row=28, column=4).value = "_______________________"
     #worksheet2.cell(row=29, column=4).value = "               (ФИО)"
     worksheet2.cell(row=4, column=6).value = "_________________"
     worksheet2.cell(row=5, column=6).value = "         (подпись)"
-    worksheet2.cell(row=1, column=1).value = "Дата"
+    worksheet2.cell(row=4, column=9).value = "=Sheet!F14"
+    worksheet2.cell(row=5, column=9).value = "                         (ФИО)"
+
+    worksheet2.cell(row=2, column=1).value = "Дата"
+    #worksheet2.cell(row=1, column=2).value = "=Sheet!B20"
     worksheet2.cell(row=10, column=4).value = f'=Sheet!F7 &"_"& Sheet!I9&"_"&Sheet!C9'
 
 
@@ -1579,7 +1582,7 @@ def svod2(request):
 
         ##################################################################################################################
         summary_df3 = pd.DataFrame(
-            columns=['Код БС', 'Количество', 'НУ-ВН-1-КП-0001',
+            columns=['Код БС', 'Количество', 'НУ-ВН-1-КП-001',
                 'НУ-ВН-1-КП-002',
                   'НУ-ВН-1-КП-003',
                  'НУ-ЗН-1-КП-001',
@@ -1720,7 +1723,7 @@ def svod2(request):
             ###############################################################################################################################
             # Чтение третьего листа файла и взятие только значений
             df3 = pd.read_excel(file, sheet_name='Sheet3', usecols="A:CF", header=None, skiprows=8, nrows=100000)
-            df3 = df3.set_axis(['Код БС', 'Количество', 'НУ-ВН-1-КП-0001',
+            df3 = df3.set_axis(['Код БС', 'Количество', 'НУ-ВН-1-КП-001',
                 'НУ-ВН-1-КП-002',
                   'НУ-ВН-1-КП-003',
                  'НУ-ЗН-1-КП-001',
@@ -2109,7 +2112,7 @@ def svod2(request):
 
 def missing_data(request):
     if request.method == 'POST':
-        # Получаем загруженный файл
+        # Получаем загруженный файл+
         uploaded_file = request.FILES['file']
 
         # Шаг 1: Прочитать таблицу из файла
