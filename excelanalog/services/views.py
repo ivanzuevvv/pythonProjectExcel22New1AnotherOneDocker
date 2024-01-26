@@ -15,7 +15,7 @@ from django.template.defaultfilters import slugify
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from openpyxl.styles import PatternFill
-
+from openpyxl.styles import Alignment, Protection
 # Create your views here.
 def index(request):
     return render(request, 'base.html')
@@ -110,7 +110,7 @@ def upload_file(request):
                 green_fill = PatternFill(start_color='00FF00', end_color='00FF00', fill_type='solid')
                 worksheet['B1'].fill = green_fill
 
-        # Создаем временный файл для сохранения изменений
+        # Созmдаем временный файл для сохранения изменений
         temp_file_name = f"{slugify(file.name)}.xlsx"
         temp_file_path = default_storage.save(temp_file_name, ContentFile(''))
 
@@ -616,7 +616,7 @@ def svod(request):
             'Контроль правильности квалификации операций в качестве капитального ремонта / реконструкции / модернизации / технического перевооружения',
             'Ручной контроль корректности и правомерности отражения расходов по оплате труда в налоговом учете',
             'Контроль отнесения расходов к непринимаемым и принимаемым на стадии приемки ПУД',
-            'Контроль правильности квалификации операций в качестве капитального ремонта / реконструкции / модернизации / технического перевооружения',
+#            'Контроль правильности квалификации операций в качестве капитального ремонта / реконструкции / модернизации / технического перевооружения',
             'Контроль определения СПИ программного обеспечения',
             'Контроль корректности проводок по учету доходов и расходов прошлых лет',
             'Контроль корректности, правомерности и своевременности отражения расходов на освоение природных ресурсов',
@@ -634,13 +634,11 @@ def svod(request):
             #
             'Контроль корректности и полноты определения объектов налогообложения по транспортному налогу',
             'Контроль корректности определения налоговой базы по транспортному налогу',
-            'Контроль полноты и правомерности применения региональных льгот по транспортному налогу (освобождение, пониженная ставка)'
+            'Контроль полноты и правомерности применения региональных льгот по транспортному налогу (освобождение, пониженная ставка)',
+            
             'Контроль корректности определения налоговых ставок по транспортному налогу ',
 
         ]
-
-
-
 
 
         with pd.ExcelWriter('summary.xlsx', engine='openpyxl') as writer:
@@ -661,14 +659,6 @@ def svod(request):
             num_rows = summary_df1.shape[0]
 
             # Установка границ объединения ячеек
-
-
-
-
-
-
-
-
             # Запись значения по умолчанию в ячейку B2
 
 
@@ -700,8 +690,43 @@ def svod(request):
             last_row2 = worksheet1.max_row
             sum_formula1 = "Итого:"
             worksheet1.cell(row=last_row2 + 0, column=6).value = sum_formula1
+#####################
+            values2 = ['Декабрь', 'Январь', 'Февраль', 'Март', 'Апрель',
+                       'Май',
+                       'Июнь', 'Июль', 'Август', 'Сентябрь',
+                       'Октябрь', 'Ноябрь',
+                       ]
+
+            # Создаем объект DataValidation
+            data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values2)))
+
+            # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
+            worksheet1.add_data_validation(data_validation)
+            data_validation.add(worksheet1['D8'])
+            worksheet1['D8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center',
+                                                                   wrap_text=True)
+
+############################
+            values2 = ['2022г', '2023г', '2024г', '2025г', '2026г',
+                       '2027г',
+                       '2028г', '2029г', '2030г'
+                       ]
+
+            # Создаем объект DataValidation
+            data_validation = DataValidation(type="list", formula1='"{}"'.format(','.join(values2)))
+
+            # Применяем DataValidation к нужным ячейкам (например, H3 и I3)
+            worksheet1.add_data_validation(data_validation)
+            data_validation.add(worksheet1['E8'])
+
+            worksheet1['E8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center',
+                                                                   wrap_text=True)
+
+###########################
 
 
+
+#######################
             worksheet1.cell(row=1, column=4).value = "Сводный реестр контрольных процедур"
             worksheet1.cell(row=1, column=4).font = Font(bold=True)
             worksheet1.cell(row=2, column=4).value = " "
@@ -709,23 +734,25 @@ def svod(request):
             worksheet1.cell(row=3, column=4).value = "Указать филиал"
             worksheet1.cell(row=3, column=4).font = Font(bold=True)
 
-            worksheet1.cell(row=4, column=4).value = "наименование филиала/отдела)"
+            worksheet1.cell(row=4, column=4).value = "наименование филиала/отдела"
             worksheet1.cell(row=6, column=4).value = "осуществляемых в целях налогового мониторинга"
             worksheet1.cell(row=6, column=4).font = Font(bold=True)
-            worksheet1.cell(row=8, column=5).value = "                                              За"
-            worksheet1.cell(row=8, column=6).value = "Указать месяц"
-            worksheet1.cell(row=8, column=7).value = "Указать год"
-            worksheet1.cell(row=8, column=8).value = " "
+            worksheet1.cell(row=8, column=3).value = "                                              За"
+            worksheet1.cell(row=8, column=4).value = "                                        Указать месяц"
+            worksheet1.cell(row=8, column=5).value = "Указать год"
+            worksheet1.cell(row=8, column=6).value = " "
 
 
 
-            worksheet1.cell(row=table_end_row + 17, column=2).value = "________________________________"
+            worksheet1.cell(row=table_end_row + 17, column=2).value = "___________________________"
             worksheet1.cell(row=table_end_row + 17, column=4).value = "________________________________"
-            worksheet1.cell(row=table_end_row + 17, column=6).value = "________________________________"
+            worksheet1.cell(row=table_end_row + 22, column=4).value = "________________________________"
+            worksheet1.cell(row=table_end_row + 17, column=6).value = "________________________"
 
             worksheet1.cell(row=table_end_row + 18, column=2).value = "должность"
             worksheet1.cell(row=table_end_row + 18, column=4).value = "подпись"
-            worksheet1.cell(row=table_end_row + 18, column=1).value = "дата"
+            worksheet1.cell(row=table_end_row + 23, column=4).value = "подпись"
+            worksheet1.cell(row=table_end_row + 22, column=1).value = "дата"
             cell = worksheet1.cell(row=table_end_row + 18, column=6)
             cell.value = "ФИО"
             cell.alignment = Alignment(horizontal='left')
@@ -743,8 +770,20 @@ def svod(request):
                 worksheet1.row_dimensions[row].height = max_length
 
                 for column_cells in worksheet1.columns:
-                    length = max(len(str(cell.value)) for cell in column_cells)
-                    worksheet1.column_dimensions[column_cells[0].column_letter].width = length
+                    worksheet1.column_dimensions[column_cells[0].column_letter].width = 30
+
+                worksheet1.column_dimensions['D'].width = 50
+                worksheet1.column_dimensions['A'].width = 10
+                worksheet1.column_dimensions['F'].width = 25
+                worksheet1.column_dimensions['G'].width = 15
+                worksheet1.column_dimensions['H'].width = 15
+                worksheet1.column_dimensions['I'].width = 15
+                worksheet1.column_dimensions['E'].width = 18
+                worksheet1.column_dimensions['J'].width = 20
+
+
+
+
 
                 # Установка выравнивания для каждой ячейки в строке
                 for cell in worksheet1[row]:
@@ -895,6 +934,8 @@ def svod(request):
             worksheet3['CD11'] = '=CD9-CD10'
             worksheet3['CE11'] = '=CE9-CE10'
 
+
+
             worksheet3.insert_cols(84)
             worksheet3.cell(row=8, column=84).value = "Итого"
 
@@ -913,6 +954,38 @@ def svod(request):
             worksheet3['A10'].fill = yellow_fill
             worksheet3['A11'].fill = yellow_fill
 
+################################################
+            for row in range(worksheet3.max_row, 0, -1):
+                max_length = 0
+
+
+                for column_cells in worksheet3.columns:
+                    worksheet3.column_dimensions[column_cells[0].column_letter].width = 18
+
+                worksheet3.column_dimensions['B'].width = 40
+                worksheet3.column_dimensions['A'].width = 17
+######################################################
+
+
+
+            #            last_row2 = worksheet3.max_row
+            worksheet3.cell(row=1, column=1).value = "Итого(Общее)"
+            #            sum_formula1 = f"=SUM(BW1:BW{last_row})"
+            #            worksheet3.cell(row=last_row2 + 0, column=75).value = sum_formula1
+            worksheet3.cell(row=2, column=2).value = "=Sheet4!C83"
+            worksheet3.merge_cells('CA1')
+            #            worksheet3['СA'] = 'Количество выполненных КП'
+            worksheet3.cell(row=3, column=2).value = "=Sheet4!D83"
+            worksheet3.merge_cells('CA1')
+
+            worksheet3.cell(row=4, column=2).value = "=Sheet4!E83"
+            worksheet3.merge_cells('CA1')
+
+            worksheet3.cell(row=2, column=1).value = "Количество выполненных КП"
+            worksheet3.cell(row=3, column=1).value = "Количество выявленных ошибок"
+            worksheet3.cell(row=4,
+                            column=1).value = "Количество контрольных процедур, не выявивших ошибки (отклонения, нарушения)"
+#################################################################################################################################
             # last_row2 = worksheet3.max_row
             # sum_formula1 = f"=SUM(D3:CD3)"
             # worksheet3.cell(row=3, column=3).value = sum_formula1
@@ -970,6 +1043,24 @@ def svod(request):
             last_row2 = worksheet4.max_row
             sum_formula1 = f"=SUM(E1:E{last_row})"
             worksheet4.cell(row=last_row2 + 0, column=5).value = sum_formula1
+
+#######################################################################
+            for row in range(worksheet4.max_row, 0, -1):
+                max_length = 0
+
+                for column_cells in worksheet4.columns:
+                    worksheet4.column_dimensions[column_cells[0].column_letter].width = 25
+
+
+                worksheet4.column_dimensions['A'].width = 10
+                worksheet4.column_dimensions['B'].width = 22
+                worksheet4.column_dimensions['C'].width = 30
+                worksheet4.column_dimensions['D'].width = 30
+                worksheet4.column_dimensions['E'].width = 30
+                worksheet4.column_dimensions['F'].width = 35
+                worksheet4.column_dimensions['G'].width = 35
+
+#######################################################################
 
             # Автоматическое расширение столбцов для второго листа
 
@@ -1184,6 +1275,7 @@ def download_excel(request, pk):
     worksheet1['A8'] = 'Номер по порядку'
     worksheet1['A8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
+
     worksheet1.cell(row=9, column=2).value = checklist1.cod_kp_overall
     worksheet1.merge_cells('B8')
     worksheet1['B8'] = 'Код КП(общий)'
@@ -1236,6 +1328,20 @@ def download_excel(request, pk):
     worksheet1['K8'] = 'Количество выявленных ошибок/ нарушений'
     worksheet1['K8'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center', wrap_text=True)
 
+#######################################################
+
+    worksheet1.protection.sheet = True
+
+    cell2 = worksheet1.cell(row=3, column=8)
+    cell2.protection = Protection(locked=False)
+    cell1 = worksheet1.cell(row=9, column=8)
+    cell = worksheet1.cell(row=9, column=9)
+    cell.protection = Protection(locked=False)
+    cell1.protection = Protection(locked=False)
+
+
+
+######################################################3
     #worksheet1.cell(row=3, column=7).value = checklist1.filial
     #worksheet1.merge_cells('H3')
     #worksheet1['H3'] = 'Филиал'
@@ -1298,9 +1404,9 @@ def download_excel(request, pk):
     worksheet1.cell(row=15, column=4).value = "             (подпись)"
     worksheet1.cell(row=14, column=6).value = "_________________"
     worksheet1.cell(row=15, column=6).value = "                (ФИО)"
-    #worksheet1.cell(row=14, column=8).value = "______________________"
+    worksheet1.cell(row=4, column=8).value = "_____________________"
     #worksheet1.cell(row=15, column=8).value = "                (дата)"
-    #worksheet1.cell(row=3, column=8).value = "_____________________________________"
+    worksheet1.cell(row=14, column=4).value = "____________________"
     worksheet1.cell(row=4, column=8).value = "(наименование филиала)"
     worksheet1.cell(row=2, column=11).value = "____________________"
     worksheet1.cell(row=3, column=11).value = "   Код отдела/службы"
@@ -1427,7 +1533,7 @@ def download_excel(request, pk):
     worksheet2.cell(row=5, column=2).value = "               (должность)"
     #worksheet2.cell(row=28, column=4).value = "_______________________"
     #worksheet2.cell(row=29, column=4).value = "               (ФИО)"
-    worksheet2.cell(row=4, column=6).value = "_________________"
+    worksheet2.cell(row=4, column=6).value = "_______________"
     worksheet2.cell(row=5, column=6).value = "         (подпись)"
     worksheet2.cell(row=4, column=9).value = "=Sheet!F14"
     worksheet2.cell(row=5, column=9).value = "                         (ФИО)"
@@ -2071,6 +2177,31 @@ def svod2(request):
                 for cell in worksheet4[row]:
                     cell.alignment = Alignment( vertical='center', wrap_text=True)
             # Опускание таблицы на 12 строк ниже начиная с первой строки
+
+
+            for row in range(worksheet3.max_row, 0, -1):
+                max_length = 0
+
+
+                for column_cells in worksheet3.columns:
+                    worksheet3.column_dimensions[column_cells[0].column_letter].width = 18
+
+                worksheet3.column_dimensions['B'].width = 40
+                worksheet3.column_dimensions['A'].width = 23
+                ############################################################
+
+                ############################################################
+                for column_cells in worksheet4.columns:
+                    worksheet4.column_dimensions[column_cells[0].column_letter].width = 18
+
+                worksheet4.column_dimensions['B'].width = 25
+                worksheet4.column_dimensions['A'].width = 10
+                worksheet4.column_dimensions['D'].width = 25
+                worksheet4.column_dimensions['E'].width = 25
+                worksheet4.column_dimensions['F'].width = 25
+                worksheet4.column_dimensions['G'].width = 25
+                ###########################################################
+
 
                     # Установка выравнивания для каждой ячейки в строке
                     # Получение объекта worksheet для второго листа
